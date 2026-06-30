@@ -98,7 +98,6 @@ class UniversalDocumentProcessor:
     def _process_pdf(self, file_path: Path) -> dict:
         """Process a PDF file."""
         import fitz
-        import pdfplumber
         from PIL import Image
 
         result = {"chunks": [], "images": [], "tables": [], "metadata": {"total_pages": 0}}
@@ -107,18 +106,30 @@ class UniversalDocumentProcessor:
         doc = fitz.open(str(file_path))
         result["metadata"]["total_pages"] = len(doc)
         all_text = {}
+        
+        has_gemini = bool(settings.GEMINI_API_KEY)
+        if has_gemini:
+            import google.generativeai as genai
+            genai.configure(api_key=settings.GEMINI_API_KEY)
 
         for page_num in range(len(doc)):
             page = doc[page_num]
-            text = page.get_text("text")
-            all_text[page_num + 1] = text
+            text = page.get_text("text").strip()
+            page_has_images = False
 
             # Extract images
             for img_idx, img_info in enumerate(page.get_images(full=True)):
+                page_has_images = True
                 try:
                     xref = img_info[0]
                     base_image = doc.extract_image(xref)
                     image = Image.open(io.BytesIO(base_image["image"]))
+                    
+                    # Prevent OOM by resizing massive images
+                    max_dim = 1024
+                    if image.width > max_dim or image.height > max_dim:
+                        image.thumbnail((max_dim, max_dim))
+                        
                     if image.width >= 50 and image.height >= 50:
                         result["images"].append({
                             "image": image,
@@ -126,8 +137,32 @@ class UniversalDocumentProcessor:
                             "index": img_idx,
                             "size": (image.width, image.height),
                         })
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.warning(f"Failed to extract image: {e}")
+                    
+            # If no text was found but the page has images, it's likely a scanned PDF
+            if not text and page_has_images and has_gemini:
+                try:
+                    logger.info(f"Page {page_num + 1} has no text, using Gemini OCR")
+                    pix = page.get_pixmap()
+                    img_bytes = pix.tobytes("png")
+                    img = Image.open(io.BytesIO(img_bytes))
+                    
+                    # Prevent OOM on full page render
+                    max_dim = 1600
+                    if img.width > max_dim or img.height > max_dim:
+                        img.thumbnail((max_dim, max_dim))
+                        
+                    model = genai.GenerativeModel("gemini-1.5-flash")
+                    response = model.generate_content([
+                        "Extract all text from this scanned document page. Return only the extracted text, nothing else.",
+                        img
+                    ])
+                    text = response.text.strip()
+                except Exception as e:
+                    logger.error(f"Gemini OCR failed for page {page_num + 1}: {e}")
+
+            all_text[page_num + 1] = text
 
         doc.close()
 

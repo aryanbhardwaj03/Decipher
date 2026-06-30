@@ -134,12 +134,20 @@ class VectorStore:
         if not idx_path.exists() or not docs_path.exists():
             return False
         try:
-            self.index = faiss.read_index(str(idx_path))
-            with open(docs_path, "r", encoding="utf-8") as f:
-                self.documents = json.load(f)
-            self.dimension = self.index.d
+            loaded_index = faiss.read_index(str(idx_path))
+            if loaded_index.d != self.dimension:
+                logger.warning(f"Dimension mismatch! Loaded {loaded_index.d}, expected {self.dimension}. Creating new index.")
+                self.index = faiss.IndexFlatIP(self.dimension)
+                self.documents = []
+            else:
+                self.index = loaded_index
+                with open(docs_path, "r", encoding="utf-8") as f:
+                    self.documents = json.load(f)
+                self.dimension = self.index.d
             logger.info(f"Loaded vector store: {self.size} vectors")
             return True
         except Exception as e:
             logger.error(f"Failed to load vector store: {e}")
+            self.index = faiss.IndexFlatIP(self.dimension)
+            self.documents = []
             return False
