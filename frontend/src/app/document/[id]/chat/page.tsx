@@ -151,8 +151,8 @@ export default function ChatPage() {
       for await (const event of apiChatStream(id, userMsg.content)) {
         if (event.type === "token") {
           // Smooth out bursty tokens by splitting them into smaller chunks and adding a tiny delay
-          // The 's' flag is critical so '.' matches newlines, preventing markdown formatting from breaking!
-          const chunks = event.content.match(/.{1,3}/gs) || [];
+          // [\s\S] is used instead of '.' with 's' flag to maintain compatibility with older ES targets
+          const chunks = event.content.match(/[\s\S]{1,3}/g) || [];
           for (const chunk of chunks) {
             await new Promise(r => setTimeout(r, 8)); // Typewriter delay
             setMessages((prev) => {

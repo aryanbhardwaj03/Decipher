@@ -24,7 +24,7 @@ export default function NotesPage({ params }: { params: Promise<{ id: string }> 
     try {
       for await (const event of apiNotesStream(id, type)) {
         if (event.type === "token") {
-          const chunks = event.content.match(/.{1,3}/gs) || [];
+          const chunks = event.content.match(/[\s\S]{1,3}/g) || [];
           for (const chunk of chunks) {
             await new Promise(r => setTimeout(r, 8));
             setContent((p) => p + chunk);

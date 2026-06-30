@@ -25,7 +25,7 @@ export default function SummaryPage({ params }: { params: Promise<{ id: string }
     try {
       for await (const event of apiSummaryStream(id, type, customFocus)) {
         if (event.type === "token") {
-          const chunks = event.content.match(/.{1,3}/gs) || [];
+          const chunks = event.content.match(/[\s\S]{1,3}/g) || [];
           for (const chunk of chunks) {
             await new Promise(r => setTimeout(r, 8)); // Typewriter delay
             setContent((p) => p + chunk);
