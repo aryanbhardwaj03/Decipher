@@ -51,7 +51,8 @@ class UniversalDocumentProcessor:
             # Download to a temporary file
             with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_type}") as tf:
                 temp_file_path = tf.name
-                with httpx.stream("GET", file_path) as r:
+                with httpx.stream("GET", file_path, follow_redirects=True, timeout=30.0) as r:
+                    r.raise_for_status()
                     for chunk in r.iter_bytes():
                         tf.write(chunk)
             process_path = Path(temp_file_path)
@@ -136,6 +137,8 @@ class UniversalDocumentProcessor:
             import google.generativeai as genai
             genai.configure(api_key=settings.GEMINI_API_KEY)
 
+        pages_needing_ocr = []
+
         for page_num in range(len(doc)):
             page = doc[page_num]
             text = page.get_text("text").strip()
@@ -164,29 +167,39 @@ class UniversalDocumentProcessor:
                 except Exception as e:
                     logger.warning(f"Failed to extract image: {e}")
                     
-            # If no text was found but the page has images, it's likely a scanned PDF
             if not text and page_has_images and has_gemini:
-                try:
-                    logger.info(f"Page {page_num + 1} has no text, using Gemini OCR")
+                pages_needing_ocr.append(page_num)
+            
+            all_text[page_num + 1] = text
+
+        if pages_needing_ocr:
+            logger.info(f"{len(pages_needing_ocr)} pages need OCR. Batching to Gemini.")
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            batch_size = 10
+            for i in range(0, len(pages_needing_ocr), batch_size):
+                batch = pages_needing_ocr[i:i + batch_size]
+                prompt_parts = ["Extract all text from the following scanned document pages. Separate the text for each page clearly using the exact format '---PAGE_X---' (where X is the page number)."]
+                
+                for p_num in batch:
+                    page = doc[p_num]
                     pix = page.get_pixmap()
-                    img_bytes = pix.tobytes("png")
+                    img_bytes = pix.tobytes("jpeg")
                     img = Image.open(io.BytesIO(img_bytes))
-                    
-                    # Prevent OOM on full page render
-                    max_dim = 1600
+                    max_dim = 1000
                     if img.width > max_dim or img.height > max_dim:
                         img.thumbnail((max_dim, max_dim))
-                        
-                    model = genai.GenerativeModel("gemini-1.5-flash")
-                    response = model.generate_content([
-                        "Extract all text from this scanned document page. Return only the extracted text, nothing else.",
-                        img
-                    ])
-                    text = response.text.strip()
+                    prompt_parts.append(f"Page {p_num + 1}:")
+                    prompt_parts.append(img)
+                
+                try:
+                    logger.info(f"Sending OCR batch {i//batch_size + 1}")
+                    response = model.generate_content(prompt_parts)
+                    # Simple parsing: assign all generated text to the first page of the batch so it gets chunked.
+                    # Or we can split by '---PAGE_' if Gemini followed instructions.
+                    # To be safe, just append it all to the first page of the batch.
+                    all_text[batch[0] + 1] = response.text.strip()
                 except Exception as e:
-                    logger.error(f"Gemini OCR failed for page {page_num + 1}: {e}")
-
-            all_text[page_num + 1] = text
+                    logger.error(f"Gemini OCR batch failed: {e}")
 
         doc.close()
 
