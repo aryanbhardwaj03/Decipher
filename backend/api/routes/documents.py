@@ -69,28 +69,7 @@ async def upload_document(
             detail=f"Unsupported file type: {ext}. Allowed: {', '.join(ALLOWED_EXTENSIONS)}",
         )
 
-    # Upload limits based on plan
-    if user.role == "guest" or user.provider == "guest":
-        from datetime import datetime, timedelta
-        from db.models import Document
-        one_week_ago = datetime.utcnow() - timedelta(days=7)
-        recent_uploads = db.query(Document).filter(
-            Document.user_id == user.id,
-            Document.created_at >= one_week_ago
-        ).count()
-        if recent_uploads >= 10:
-            raise HTTPException(
-                status_code=429,
-                detail="Guest upload limit reached (10 documents per week). Please sign up to upload more.",
-            )
-    elif getattr(user, 'plan', 'Basic') == "Basic":
-        from db.models import Document
-        total_uploads = db.query(Document).filter(Document.user_id == user.id).count()
-        if total_uploads >= 30:
-            raise HTTPException(
-                status_code=429,
-                detail="Basic plan limit reached (30 documents). Please upgrade to Plus or Pro for unlimited uploads.",
-            )
+    # Upload limits have been removed to allow unlimited uploads for all users.
 
     # Read file content
     content = await file.read()

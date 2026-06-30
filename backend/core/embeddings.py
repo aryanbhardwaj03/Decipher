@@ -1,13 +1,13 @@
 """
 Embedding Engine.
-Sentence Transformers for text embeddings.
+Google Generative AI for text embeddings.
 """
 
 import logging
 from typing import Optional
 
 import numpy as np
-from sentence_transformers import SentenceTransformer
+import google.generativeai as genai
 
 from config import settings
 
@@ -24,28 +24,65 @@ def get_embedding_engine():
 
 
 class EmbeddingEngine:
-    """Generates text embeddings using Sentence Transformers."""
+    """Generates text embeddings using Google Gemini API."""
 
     def __init__(self):
         logger.info(f"Loading embedding model: {settings.EMBEDDING_MODEL}")
-        self.model = SentenceTransformer(
-            settings.EMBEDDING_MODEL, device=settings.EMBEDDING_DEVICE
-        )
-        logger.info("Embedding model loaded.")
+        
+        if not settings.GEMINI_API_KEY:
+            logger.warning("GEMINI_API_KEY is not set. Embeddings will fail.")
+            
+        genai.configure(api_key=settings.GEMINI_API_KEY)
+        self.model_name = settings.EMBEDDING_MODEL
+        logger.info("Embedding model loaded via API.")
 
     def embed_texts(self, texts: list[str], batch_size: int = 64) -> np.ndarray:
         if not texts:
             return np.array([])
-        embeddings = self.model.encode(
-            texts, batch_size=batch_size, normalize_embeddings=True,
-            show_progress_bar=len(texts) > 100,
-        )
+            
+        embeddings = []
+        # Process in batches to avoid rate limits or payload limits
+        for i in range(0, len(texts), batch_size):
+            batch = texts[i:i + batch_size]
+            try:
+                # We can request batch embeddings directly
+                response = genai.embed_content(
+                    model=self.model_name,
+                    content=batch,
+                    task_type="retrieval_document",
+                )
+                
+                if isinstance(response, dict) and "embedding" in response:
+                    # Depending on library version, response might return a list of embeddings
+                    batch_embeddings = response["embedding"]
+                    if isinstance(batch_embeddings[0], list):
+                        embeddings.extend(batch_embeddings)
+                    else:
+                        embeddings.append(batch_embeddings)
+            except Exception as e:
+                logger.error(f"Failed to embed batch: {e}")
+                # Fallback to zero vectors if API fails so it doesn't crash the entire background task
+                for _ in range(len(batch)):
+                    embeddings.append([0.0] * self.dimension)
+
         return np.array(embeddings, dtype=np.float32)
 
     def embed_query(self, query: str) -> np.ndarray:
-        embedding = self.model.encode([query], normalize_embeddings=True)
-        return np.array(embedding, dtype=np.float32)[0]
+        try:
+            response = genai.embed_content(
+                model=self.model_name,
+                content=query,
+                task_type="retrieval_query",
+            )
+            embedding = response["embedding"]
+            # Handle if it returns a list of lists or a single list
+            if isinstance(embedding[0], list):
+                embedding = embedding[0]
+            return np.array(embedding, dtype=np.float32)
+        except Exception as e:
+            logger.error(f"Failed to embed query: {e}")
+            return np.zeros(self.dimension, dtype=np.float32)
 
     @property
     def dimension(self) -> int:
-        return self.model.get_sentence_embedding_dimension()
+        return settings.EMBEDDING_DIMENSION
