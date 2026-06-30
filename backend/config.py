@@ -5,7 +5,7 @@ Centralized settings with Pydantic BaseSettings for environment variable support
 
 from pathlib import Path
 from pydantic_settings import BaseSettings
-from pydantic import Field
+from pydantic import Field, field_validator
 
 
 class Settings(BaseSettings):
@@ -18,7 +18,14 @@ class Settings(BaseSettings):
     CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000", "http://127.0.0.1:3001"]
 
     # ── Database ──────────────────────────────────────────
-    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/study_assistant"
+    DATABASE_URL: str = "sqlite:///./data/study_assistant.db"
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def fix_postgres_url(cls, v: str | None) -> str | None:
+        if v and v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql://", 1)
+        return v
 
     # ── JWT Auth ──────────────────────────────────────────
     JWT_SECRET: str = "change-me-in-production-use-long-random-string"
