@@ -40,8 +40,25 @@ class UniversalDocumentProcessor:
         Returns:
             dict with 'chunks', 'images', 'tables', 'metadata'
         """
-        file_path = Path(file_path)
-        logger.info(f"Processing {file_type.upper()}: {file_path.name}")
+        import tempfile
+        import httpx
+        import os
+
+        is_url = file_path.startswith("http://") or file_path.startswith("https://")
+        temp_file_path = None
+
+        if is_url:
+            # Download to a temporary file
+            with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_type}") as tf:
+                temp_file_path = tf.name
+                with httpx.stream("GET", file_path) as r:
+                    for chunk in r.iter_bytes():
+                        tf.write(chunk)
+            process_path = Path(temp_file_path)
+            logger.info(f"Downloaded {file_type.upper()} from URL to temporary file")
+        else:
+            process_path = Path(file_path)
+            logger.info(f"Processing {file_type.upper()}: {process_path.name}")
 
         processors = {
             "pdf": self._process_pdf,
@@ -53,11 +70,18 @@ class UniversalDocumentProcessor:
             "md": self._process_markdown,
         }
 
-        processor = processors.get(file_type)
-        if not processor:
-            raise ValueError(f"Unsupported file type: {file_type}")
+        try:
+            processor = processors.get(file_type)
+            if not processor:
+                raise ValueError(f"Unsupported file type: {file_type}")
 
-        return processor(file_path)
+            return processor(process_path)
+        finally:
+            if temp_file_path and os.path.exists(temp_file_path):
+                try:
+                    os.remove(temp_file_path)
+                except OSError:
+                    pass
 
     def _process_ppt(self, file_path: Path) -> dict:
         """Process a legacy .ppt file using Apache Tika."""

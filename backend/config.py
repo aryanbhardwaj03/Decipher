@@ -58,7 +58,7 @@ class Settings(BaseSettings):
     SIMILARITY_THRESHOLD: float = 0.25
 
     # ── Storage ───────────────────────────────────────────
-    STORAGE_PROVIDER: str = "local"  # "local", "supabase", "s3"
+    STORAGE_PROVIDER: str = "supabase"  # "local", "supabase", "s3"
     SUPABASE_URL: str = ""
     SUPABASE_KEY: str = ""
     SUPABASE_BUCKET: str = "documents"

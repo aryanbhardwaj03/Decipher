@@ -199,3 +199,19 @@ class XPTransaction(Base):
 
     # Relationships
     user = relationship("User", back_populates="xp_transactions")
+
+
+class DocumentChunk(Base):
+    __tablename__ = "document_chunks"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    document_id = Column(String, ForeignKey("documents.id", ondelete="CASCADE"), nullable=False, index=True)
+    text = Column(String, nullable=False)
+    metadata_json = Column(JSON, default=dict)
+    
+    # Needs pgvector to be installed
+    from pgvector.sqlalchemy import Vector
+    embedding = Column(Vector(768))  # Match EMBEDDING_DIMENSION
+
+    # Relationships
+    document = relationship("Document")

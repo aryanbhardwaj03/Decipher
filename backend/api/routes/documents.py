@@ -82,12 +82,26 @@ async def upload_document(
             detail=f"File too large. Maximum size: {settings.MAX_UPLOAD_SIZE_MB} MB",
         )
 
-    # Save file locally
     import uuid
     safe_filename = f"{uuid.uuid4().hex}{ext}"
-    file_path = UPLOAD_DIR / safe_filename
-    with open(file_path, "wb") as f:
-        f.write(content)
+
+    if settings.STORAGE_PROVIDER == "supabase" and settings.SUPABASE_URL:
+        from supabase import create_client, Client
+        supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+        
+        # Upload to Supabase
+        res = supabase.storage.from_(settings.SUPABASE_BUCKET).upload(
+            path=safe_filename,
+            file=content,
+            file_options={"content-type": file.content_type}
+        )
+        
+        file_path_or_url = supabase.storage.from_(settings.SUPABASE_BUCKET).get_public_url(safe_filename)
+    else:
+        # Save file locally
+        file_path_or_url = str(UPLOAD_DIR / safe_filename)
+        with open(file_path_or_url, "wb") as f:
+            f.write(content)
 
     # Create DB record
     doc = crud.create_document(
@@ -97,11 +111,11 @@ async def upload_document(
         original_filename=file.filename,
         file_type=ext.lstrip("."),
         file_size=file_size,
-        storage_url=str(file_path),
+        storage_url=file_path_or_url,
     )
 
     # Process document in background
-    background_tasks.add_task(process_document_task, doc.id, str(file_path), ext.lstrip("."))
+    background_tasks.add_task(process_document_task, doc.id, file_path_or_url, ext.lstrip("."))
 
     return DocumentResponse(
         id=doc.id,
@@ -195,6 +209,11 @@ def get_document_file(
     if not doc or (doc.user_id != user.id and user.role != "admin"):
         raise HTTPException(status_code=404, detail="Document not found")
 
+    if doc.storage_url.startswith("http"):
+        # If it's a Supabase URL, redirect the user to the public URL directly
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse(url=doc.storage_url)
+
     file_path = Path(doc.storage_url)
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="File not found on server")
@@ -218,9 +237,19 @@ def delete_document(
         raise HTTPException(status_code=404, detail="Document not found")
 
     # Delete file
-    file_path = Path(doc.storage_url) if doc.storage_url else None
-    if file_path and file_path.exists():
-        file_path.unlink()
+    if doc.storage_url:
+        if doc.storage_url.startswith("http") and settings.SUPABASE_URL:
+            # Delete from Supabase
+            try:
+                from supabase import create_client, Client
+                supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+                supabase.storage.from_(settings.SUPABASE_BUCKET).remove([doc.filename])
+            except Exception as e:
+                logger.warning(f"Failed to delete from Supabase: {e}")
+        else:
+            file_path = Path(doc.storage_url)
+            if file_path.exists():
+                file_path.unlink()
 
     # Remove from vector store
     from core.vector_store import get_vector_store
