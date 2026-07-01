@@ -106,7 +106,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             autoCloseTimer.current = setTimeout(() => setIsToastOpen(false), 3000);
           }}
         >
-          <div className="w-[340px] bg-card border border-border shadow-xl rounded-xl p-4 flex items-start gap-4 cursor-pointer hover:bg-muted/50 transition-colors"
+          <div className="w-[340px] bg-background border border-border shadow-2xl rounded-xl p-4 flex items-start gap-4 cursor-pointer hover:bg-muted transition-colors"
                onClick={() => setIsToastOpen(false)}>
             <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center 
               ${latestNotification.type === 'success' ? 'bg-success/10 text-success' : 
