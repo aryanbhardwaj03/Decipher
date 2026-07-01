@@ -91,6 +91,10 @@ app.include_router(users.router)
 
 
 # ── Health Check ─────────────────────────────────────────────────────────
+@app.get("/")
+def root():
+    return {"message": "Decipher API is running"}
+
 @app.get("/api/health")
 def health_check():
     return {
