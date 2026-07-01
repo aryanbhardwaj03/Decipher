@@ -82,12 +82,12 @@ export default function DashboardPage() {
     if (!confirm("Delete this document?")) return;
     const previousDocs = documents;
     setDocuments((prev) => prev.filter((d) => d.id !== id));
+    showToast("Document deleted", "success");
     try {
       await apiDeleteDocument(id);
-      showToast("Document deleted", "success");
     } catch {
       setDocuments(previousDocs);
-      showToast("Failed to delete", "error");
+      showToast("Failed to delete document", "error");
     }
   };
 
