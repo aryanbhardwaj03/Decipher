@@ -6,6 +6,7 @@ import { Users, FileText, Activity, ShieldAlert, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useRouter } from "next/navigation";
+import { API_BASE } from "@/lib/constants";
 import {
   LineChart,
   Line,
@@ -29,7 +30,7 @@ export default function AdminDashboard() {
     try {
       setDownloadingDoc(docId);
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:8000/api/documents/${docId}/file`, {
+      const res = await fetch(`${API_BASE}/api/documents/${docId}/file`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -65,7 +66,7 @@ export default function AdminDashboard() {
         const headers = { Authorization: `Bearer ${token}` };
 
         // Fetch Stats
-        const statsRes = await fetch("http://localhost:8000/api/admin/stats", { headers });
+        const statsRes = await fetch(`${API_BASE}/api/admin/stats`, { headers });
         if (statsRes.ok) {
           const statsData = await statsRes.json();
           setStats(statsData);
@@ -73,14 +74,14 @@ export default function AdminDashboard() {
 
         // Fetch Users (Only once initially)
         if (usersList.length === 0) {
-          const usersRes = await fetch("http://localhost:8000/api/admin/users", { headers });
+          const usersRes = await fetch(`${API_BASE}/api/admin/users`, { headers });
           if (usersRes.ok) {
             const usersData = await usersRes.json();
             setUsersList(usersData.users);
           }
           
           // Fetch Documents
-          const docsRes = await fetch("http://localhost:8000/api/admin/documents", { headers });
+          const docsRes = await fetch(`${API_BASE}/api/admin/documents`, { headers });
           if (docsRes.ok) {
             const docsData = await docsRes.json();
             setDocumentsList(docsData.documents);

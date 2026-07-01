@@ -11,6 +11,7 @@ import { showToast } from "@/components/ui/Toaster";
 
 import { useAuth } from "@/components/providers/AuthProvider";
 import { apiChangePassword, apiUploadAvatar, apiUpdateProfile, apiExportData, apiDeleteAllData, apiCreateOrder, apiCancelSubscription } from "@/lib/api";
+import { API_BASE } from "@/lib/constants";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -226,7 +227,7 @@ export default function SettingsPage() {
                     <div className="flex items-center gap-6">
                       <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center border-4 border-background shadow-sm text-3xl font-bold text-muted-foreground overflow-hidden">
                         {user?.avatar_url ? (
-                          <img src={`http://localhost:8000${user.avatar_url}`} alt="Avatar" className="w-full h-full object-cover" />
+                          <img src={`${API_BASE}${user.avatar_url}`} alt="Avatar" className="w-full h-full object-cover" />
                         ) : (
                           getInitials(user?.name, user?.email)
                         )}

@@ -9,6 +9,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { DocumentSelector } from "./DocumentSelector";
 import { GlobalSearch } from "./GlobalSearch";
+import { API_BASE } from "@/lib/constants";
 
 export function TopBar({ toggleSidebar, isSidebarOpen = true }: { toggleSidebar?: () => void, isSidebarOpen?: boolean }) {
   const { user, logout } = useAuth();
@@ -85,7 +86,7 @@ export function TopBar({ toggleSidebar, isSidebarOpen = true }: { toggleSidebar?
               className="w-9 h-9 rounded-full bg-card border border-border flex items-center justify-center font-bold text-sm text-foreground shadow-sm hover:border-primary/50 transition-colors cursor-pointer overflow-hidden ring-2 ring-transparent hover:ring-primary/20"
             >
               {user.avatar_url ? (
-                <img src={`http://localhost:8000${user.avatar_url}`} alt="Avatar" className="w-full h-full object-cover" />
+                <img src={`${API_BASE}${user.avatar_url}`} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
                 getInitials(user.name, user.email)
               )}
