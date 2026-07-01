@@ -90,13 +90,19 @@ async def upload_document(
         supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
         
         # Upload to Supabase
-        res = supabase.storage.from_(settings.SUPABASE_BUCKET).upload(
-            path=safe_filename,
-            file=content,
-            file_options={"content-type": file.content_type}
-        )
-        
-        file_path_or_url = supabase.storage.from_(settings.SUPABASE_BUCKET).get_public_url(safe_filename)
+        try:
+            res = supabase.storage.from_(settings.SUPABASE_BUCKET).upload(
+                path=safe_filename,
+                file=content,
+                file_options={"content-type": file.content_type}
+            )
+            file_path_or_url = supabase.storage.from_(settings.SUPABASE_BUCKET).get_public_url(safe_filename)
+        except Exception as e:
+            logger.error(f"Supabase upload failed: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Storage error: {e}"
+            )
     else:
         # Save file locally
         file_path_or_url = str(UPLOAD_DIR / safe_filename)
