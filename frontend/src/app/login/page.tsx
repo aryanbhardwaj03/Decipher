@@ -92,7 +92,7 @@ export default function LoginPage() {
         {/* Top actions */}
         <div className="flex items-center justify-between mb-8">
           <button
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.push("/")}
             className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
@@ -236,7 +236,7 @@ export default function LoginPage() {
         {/* Continue as guest */}
         <div className="mt-6 pt-5 border-t border-border">
           <button
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.push("/")}
             className="w-full py-2.5 rounded-xl text-sm font-medium border border-border bg-card hover:bg-muted transition-all text-foreground"
           >
             Continue without account
