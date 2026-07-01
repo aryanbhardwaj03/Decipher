@@ -28,11 +28,9 @@ export function DocumentCard({ document, doc, onDelete, onToggleFavorite, index 
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="group relative"
+    <div
+      className="group relative animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-500"
+      style={{ animationFillMode: "backwards", animationDelay: `${index * 50}ms` }}
     >
       <Link href={isProcessing || !d.id ? "#" : `/document/${d.id}`}>
         <div className={cn(
@@ -105,7 +103,7 @@ export function DocumentCard({ document, doc, onDelete, onToggleFavorite, index 
           </button>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
