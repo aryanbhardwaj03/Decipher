@@ -152,7 +152,13 @@ class UniversalDocumentProcessor:
                     base_image = doc.extract_image(xref)
                     image = Image.open(io.BytesIO(base_image["image"]))
                     
-                    # Prevent OOM by resizing massive images
+                    # Prevent OOM by skipping massive images instead of trying to resize them
+                    # Decoding a 4000x4000 image takes ~50MB of RAM
+                    if image.width > 2000 or image.height > 2000:
+                        logger.warning(f"Skipping extremely large image ({image.width}x{image.height}) to prevent OOM.")
+                        continue
+                        
+                    # Still resize moderately large images to save space
                     max_dim = 1024
                     if image.width > max_dim or image.height > max_dim:
                         image.thumbnail((max_dim, max_dim))
