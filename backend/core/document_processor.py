@@ -85,40 +85,12 @@ class UniversalDocumentProcessor:
                     pass
 
     def _process_ppt(self, file_path: Path) -> dict:
-        """Process a legacy .ppt file using Apache Tika."""
-        from tika import parser
-        parsed = parser.from_file(str(file_path))
-        text = parsed.get("content", "") or ""
-        text = text.strip()
-
-        result = {"chunks": [], "images": [], "tables": [], "metadata": {"total_pages": max(1, len(text) // 3000)}}
-
-        if text:
-            for i, chunk_text in enumerate(self.splitter.split_text(text)):
-                result["chunks"].append(DocumentChunk(
-                    text=chunk_text,
-                    metadata={"page": 0, "chunk_index": i, "type": "slide"},
-                ))
-
-        return result
+        """Process a legacy .ppt file."""
+        raise ValueError("Legacy .ppt files are not supported on this server tier due to memory limits. Please save your file as a modern .pptx and upload it again.")
 
     def _process_doc(self, file_path: Path) -> dict:
-        """Process a legacy .doc file using Apache Tika."""
-        from tika import parser
-        parsed = parser.from_file(str(file_path))
-        text = parsed.get("content", "") or ""
-        text = text.strip()
-
-        result = {"chunks": [], "images": [], "tables": [], "metadata": {"total_pages": max(1, len(text) // 3000)}}
-
-        if text:
-            for i, chunk_text in enumerate(self.splitter.split_text(text)):
-                result["chunks"].append(DocumentChunk(
-                    text=chunk_text,
-                    metadata={"page": 0, "chunk_index": i, "type": "text"},
-                ))
-
-        return result
+        """Process a legacy .doc file."""
+        raise ValueError("Legacy .doc files are not supported on this server tier due to memory limits. Please save your file as a modern .docx and upload it again.")
 
     def _process_pdf(self, file_path: Path) -> dict:
         """Process a PDF file."""
