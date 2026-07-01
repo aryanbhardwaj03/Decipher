@@ -58,15 +58,18 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
+    fetchDocuments();
+  }, [fetchDocuments]);
+
+  useEffect(() => {
     if (!authLoading) {
-      fetchDocuments();
       if (!isGuest) {
         fetchXpHistory();
       } else {
         setXpData(null);
       }
     }
-  }, [authLoading, isGuest, fetchDocuments, fetchXpHistory]);
+  }, [authLoading, isGuest, fetchXpHistory]);
 
   useEffect(() => {
     if (documents.some((d) => d.status === "processing")) {

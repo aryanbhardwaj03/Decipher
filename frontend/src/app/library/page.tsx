@@ -44,10 +44,8 @@ export default function LibraryPage() {
   }, []);
 
   useEffect(() => {
-    if (!authLoading) {
-      fetchDocuments();
-    }
-  }, [authLoading, fetchDocuments]);
+    fetchDocuments();
+  }, [fetchDocuments]);
 
   useEffect(() => {
     if (documents.some((d) => d.status === "processing")) {
