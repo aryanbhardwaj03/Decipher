@@ -226,7 +226,7 @@ export async function apiUploadDocument(file: File) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await apiFetch("/api/documents/upload", {
+  const res = await apiFetch("/api/documents/new", {
     method: "POST",
     body: formData,
   });

@@ -53,7 +53,7 @@ class DocumentListResponse(BaseModel):
 
 # ── Routes ────────────────────────────────────────────────────────────────
 
-@router.post("/upload", response_model=DocumentResponse)
+@router.post("/new", response_model=DocumentResponse)
 async def upload_document(
     file: UploadFile = File(...),
     background_tasks: BackgroundTasks = BackgroundTasks(),
