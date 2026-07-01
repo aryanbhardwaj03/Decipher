@@ -56,23 +56,31 @@ async function apiFetch(
     ...options.headers,
   };
 
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    cache: "no-store",
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+      cache: "no-store",
+      ...options,
+      headers,
+    });
 
-  if (response.status === 401) {
-    if (!endpoint.startsWith("/api/auth/")) {
-      const token = getToken();
-      if (token) {
-        clearToken();
-        throw new Error("Session expired. Continue as guest or sign in again.");
+    if (response.status === 401) {
+      if (!endpoint.startsWith("/api/auth/")) {
+        const token = getToken();
+        if (token) {
+          clearToken();
+          throw new Error("Session expired. Continue as guest or sign in again.");
+        }
       }
     }
-  }
 
-  return response;
+    return response;
+  } catch (error: any) {
+    if (error.name === "TypeError" && error.message === "Failed to fetch") {
+      // This is a network or CORS error. Show the URL to help debug.
+      showToast(`Network/CORS error connecting to ${API_BASE || "relative URL"}`, "error");
+    }
+    throw error;
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
