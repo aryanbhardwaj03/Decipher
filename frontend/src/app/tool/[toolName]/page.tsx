@@ -99,20 +99,13 @@ export default function ToolSelectorPage() {
           ) : documents.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {documents.map((doc, i) => (
-                <motion.div 
-                  key={doc.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  onClick={() => router.push(`/document/${doc.id}/${toolName}`)}
-                  className="cursor-pointer hover:ring-2 hover:ring-primary/40 transition-all rounded-2xl"
-                >
+                <div key={doc.id} className="hover:ring-2 hover:ring-primary/40 transition-all rounded-2xl">
                   <DocumentCard 
                     doc={doc} 
-                    onDelete={() => {}} 
-                    onToggleFavorite={() => {}} 
+                    index={i}
+                    href={`/document/${doc.id}/${toolName}`}
                   />
-                </motion.div>
+                </div>
               ))}
             </div>
           ) : (

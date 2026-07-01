@@ -12,9 +12,10 @@ interface DocumentCardProps {
   onDelete?: (id: string) => void;
   onToggleFavorite?: (id: string) => void;
   index?: number;
+  href?: string;
 }
 
-export function DocumentCard({ document, doc, onDelete, onToggleFavorite, index = 0 }: DocumentCardProps) {
+export function DocumentCard({ document, doc, onDelete, onToggleFavorite, index = 0, href }: DocumentCardProps) {
   // Use whichever prop was passed, or an empty object if neither (prevents crashes)
   const d = document || doc || ({} as Partial<Document>);
   
@@ -39,7 +40,7 @@ export function DocumentCard({ document, doc, onDelete, onToggleFavorite, index 
       }}
       className="group relative"
     >
-      <Link href={isProcessing || !d.id ? "#" : `/document/${d.id}`}>
+      <Link href={href || (isProcessing || !d.id ? "#" : `/document/${d.id}`)}>
         <div className={cn(
           "relative p-4 rounded-2xl border transition-all bg-card border-border card-hover",
           isProcessing && "animate-pulse-soft",
