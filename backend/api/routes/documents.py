@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from config import settings, UPLOAD_DIR
 from db.database import get_db
 from db import crud
+from db.models import Document
 from api.middleware.auth import get_current_or_guest_user
 
 logger = logging.getLogger(__name__)
@@ -73,7 +74,18 @@ async def upload_document(
             detail=f"Unsupported file type: {ext}. Allowed: {', '.join(ALLOWED_EXTENSIONS)}",
         )
 
-    # Upload limits have been removed to allow unlimited uploads for all users.
+    # Enforce upload limits
+    doc_count = db.query(Document).filter(Document.user_id == user.id).count()
+    if user.role == "guest" and doc_count >= 10:
+        raise HTTPException(
+            status_code=403,
+            detail="Guest storage limit reached (10 documents). Please sign up to upload more.",
+        )
+    elif user.role != "guest" and (user.plan == "Basic" or not user.plan) and doc_count >= 30:
+        raise HTTPException(
+            status_code=403,
+            detail="Storage limit reached (30 documents). Please upgrade to Plus or Pro.",
+        )
 
     # Read file content
     content = await file.read()
