@@ -60,7 +60,7 @@ export function UploadZone({ onUploadComplete, customButton }: UploadZoneProps) 
         showToast(`${item.file.name} uploaded!`, "success");
       } catch (err: any) {
         setUploading((prev) => prev.map((u) => u.file === item.file ? { ...u, status: "error" as const, error: err.message } : u));
-        showToast(`Failed to upload ${item.file.name}`, "error");
+        showToast(`Failed to upload ${item.file.name}: ${err.message}`, "error");
       }
     }
 

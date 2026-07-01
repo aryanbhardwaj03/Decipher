@@ -221,7 +221,14 @@ export async function apiUploadDocument(file: File) {
     method: "POST",
     body: formData,
   });
-  if (!res.ok) throw new Error((await res.json()).detail || "Upload failed");
+  if (!res.ok) {
+    let detail = `Upload failed (${res.status})`;
+    try {
+      const json = await res.json();
+      if (json.detail) detail = typeof json.detail === "string" ? json.detail : JSON.stringify(json.detail);
+    } catch (e) {}
+    throw new Error(detail);
+  }
   return res.json();
 }
 
