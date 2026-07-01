@@ -7,7 +7,7 @@ import {
   Layers, Settings, Plus, Sparkles, Sun, Moon, Image as ImageIcon, Search, StickyNote, PanelLeftClose
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "./ThemeToggle";
+
 import { showToast } from "@/components/ui/Toaster";
 import { useAuth } from "@/components/providers/AuthProvider";
 
@@ -101,10 +101,6 @@ export function Sidebar({ onUploadClick, onClose }: { onUploadClick?: () => void
           </Link>
         )}
 
-        {/* Theme Toggle */}
-        <div className="flex items-center gap-2 px-2">
-          <ThemeToggle />
-        </div>
       </div>
     </aside>
   );
