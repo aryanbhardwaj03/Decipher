@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Loader2, RotateCcw, Shuffle, ChevronLeft, ChevronRight } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { apiGenerateFlashcards, apiGetFlashcards } from "@/lib/api";
+import { useNotifications } from "@/components/providers/NotificationProvider";
 import { showToast } from "@/components/ui/Toaster";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +19,7 @@ export default function FlashcardsPage({ params }: { params: Promise<{ id: strin
   const [flipped, setFlipped] = useState(false);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const { addNotification } = useNotifications();
 
   useEffect(() => {
     if (id) {
@@ -32,6 +34,12 @@ export default function FlashcardsPage({ params }: { params: Promise<{ id: strin
       const data = await apiGenerateFlashcards(id, 15);
       setCards(data.cards); setCurrent(0); setFlipped(false);
       showToast(`${data.cards.length} flashcards created!`, "success");
+      addNotification({
+        type: "success",
+        title: "Flashcards generated",
+        message: `${data.cards.length} flashcards have been created to test your knowledge.`,
+        iconName: "Layers"
+      });
     } catch (err: any) {
       showToast(err.message || "Failed to generate", "error");
     } finally { setGenerating(false); }
@@ -95,7 +103,7 @@ export default function FlashcardsPage({ params }: { params: Promise<{ id: strin
                 className="relative w-full h-64 cursor-pointer" style={{ transformStyle: "preserve-3d" }}>
                 {/* Front */}
                 <div className="absolute inset-0 rounded-2xl bg-card border border-border p-6 flex flex-col items-center justify-center text-center"
-                  style={{ backfaceVisibility: "hidden" }}>
+                  style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}>
                   {card?.difficulty && (
                     <span className={cn("absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize", diffColors[card.difficulty] || diffColors.medium)}>
                       {card.difficulty}
@@ -107,7 +115,7 @@ export default function FlashcardsPage({ params }: { params: Promise<{ id: strin
                 </div>
                 {/* Back */}
                 <div className="absolute inset-0 rounded-2xl bg-primary/[0.04] border border-primary/15 p-6 flex flex-col items-center justify-center text-center"
-                  style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
+                  style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
                   <p className="text-[10px] text-primary uppercase tracking-widest mb-3">Answer</p>
                   <p className="text-sm font-semibold leading-relaxed">{card?.back}</p>
                 </div>

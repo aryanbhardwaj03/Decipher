@@ -102,7 +102,12 @@ export function NotificationCenter() {
                         <p className="text-[14px] font-semibold text-foreground truncate">
                           {n.title}
                         </p>
-                        <p className="text-[12px] text-muted-foreground mt-0.5">
+                        {n.message && (
+                          <p className="text-[13px] text-muted-foreground mt-0.5 line-clamp-2">
+                            {n.message}
+                          </p>
+                        )}
+                        <p className="text-[11px] text-muted-foreground/70 mt-1">
                           {n.time}
                         </p>
                       </div>

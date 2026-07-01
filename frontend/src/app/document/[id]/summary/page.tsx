@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { apiSummaryStream } from "@/lib/api";
+import { useNotifications } from "@/components/providers/NotificationProvider";
 import { cn } from "@/lib/utils";
 import { SUMMARY_TYPES } from "@/lib/constants";
 import ReactMarkdown from "react-markdown";
@@ -17,6 +18,7 @@ export default function SummaryPage({ params }: { params: Promise<{ id: string }
   const [content, setContent] = useState("");
   const [generating, setGenerating] = useState(false);
   const [customFocus, setCustomFocus] = useState("");
+  const { addNotification } = useNotifications();
 
   const handleGenerate = async (type: string) => {
     setActiveType(type);
@@ -33,6 +35,12 @@ export default function SummaryPage({ params }: { params: Promise<{ id: string }
         }
         else if (event.type === "error") { setContent("❌ " + event.content); break; }
       }
+      addNotification({
+        type: "info",
+        title: "Summary generated",
+        message: `Your ${type === "custom" ? "custom" : type.toLowerCase()} summary is ready.`,
+        iconName: "Sparkles"
+      });
     } catch {
       setContent("Failed to generate summary.");
     } finally {

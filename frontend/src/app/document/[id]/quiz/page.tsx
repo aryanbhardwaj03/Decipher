@@ -7,6 +7,7 @@ import { ArrowLeft, Loader2, CheckCircle2, XCircle, ChevronRight, Trophy, Rotate
 import { AppLayout } from "@/components/layout/AppLayout";
 import { apiGenerateQuiz, apiSubmitQuiz } from "@/lib/api";
 import { showToast } from "@/components/ui/Toaster";
+import { useNotifications } from "@/components/providers/NotificationProvider";
 import { getCorrectMessage, getIncorrectMessage, cn } from "@/lib/utils";
 import { QUIZ_TYPES } from "@/lib/constants";
 
@@ -39,6 +40,7 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
   const [difficulty, setDifficulty] = useState("medium");
   const [selectedTypes, setSelectedTypes] = useState(["mcq", "true_false"]);
   const [topicFocus, setTopicFocus] = useState("");
+  const { addNotification } = useNotifications();
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -53,6 +55,12 @@ export default function QuizPage({ params }: { params: Promise<{ id: string }> }
       setFeedback({});
       setScore(0);
       setStreak(0);
+      addNotification({
+        type: "success",
+        title: "Quiz generated",
+        message: `${numQuestions} questions ready for you.`,
+        iconName: "Brain"
+      });
     } catch (err: any) {
       showToast(err.message || "Failed to generate quiz", "error");
     } finally {

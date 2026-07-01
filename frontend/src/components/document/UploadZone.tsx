@@ -6,6 +6,8 @@ import { Upload, X, Loader2, CheckCircle2, Sparkles } from "lucide-react";
 import { cn, formatFileSize, getFileIcon } from "@/lib/utils";
 import { SUPPORTED_EXTENSIONS } from "@/lib/constants";
 import { apiUploadDocument } from "@/lib/api";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { useNotifications } from "@/components/providers/NotificationProvider";
 import { showToast } from "@/components/ui/Toaster";
 
 interface UploadZoneProps {
@@ -22,6 +24,7 @@ interface UploadingFile {
 export function UploadZone({ onUploadComplete, customButton }: UploadZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState<UploadingFile[]>([]);
+  const { addNotification } = useNotifications();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -58,6 +61,12 @@ export function UploadZone({ onUploadComplete, customButton }: UploadZoneProps) 
         await apiUploadDocument(item.file);
         setUploading((prev) => prev.map((u) => u.file === item.file ? { ...u, status: "done" as const } : u));
         showToast(`${item.file.name} uploaded!`, "success");
+        addNotification({
+          type: "success",
+          title: "Document uploaded successfully",
+          message: `${item.file.name} is now available in your library.`,
+          iconName: "FileText"
+        });
       } catch (err: any) {
         setUploading((prev) => prev.map((u) => u.file === item.file ? { ...u, status: "error" as const, error: err.message } : u));
         showToast(`Failed to upload ${item.file.name}: ${err.message}`, "error");

@@ -10,6 +10,7 @@ export interface AppNotification {
   id: number;
   type: NotificationType;
   title: string;
+  message?: string;
   time: string;
   iconName: string;
   read: boolean;
@@ -27,11 +28,7 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 const defaultNotifications: AppNotification[] = [
-  { id: 1, type: "success", title: "Document uploaded successfully", time: "Just now", iconName: "FileText", read: false },
-  { id: 2, type: "info", title: "Summary generated", time: "2 mins ago", iconName: "Sparkles", read: false },
-  { id: 3, type: "info", title: "Quiz generated", time: "10 mins ago", iconName: "Brain", read: false },
-  { id: 4, type: "warning", title: "Storage is almost full", time: "1 hour ago", iconName: "AlertTriangle", read: true },
-  { id: 5, type: "success", title: "Welcome to the platform", time: "1 day ago", iconName: "CheckCircle2", read: true },
+  { id: 1, type: "success", title: "Welcome to Decipher!", message: "Get started by uploading a document.", time: "Just now", iconName: "CheckCircle2", read: false },
 ];
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
