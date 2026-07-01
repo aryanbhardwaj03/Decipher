@@ -70,7 +70,7 @@ export function AppLayout({ children, onUploadClick }: { children: React.ReactNo
           <TopBar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} isSidebarOpen={sidebarOpen} />
         </div>
         
-        <main className="flex-1 w-full bg-background">
+        <main className="flex-1 w-full bg-background relative">
           {children}
         </main>
       </div>

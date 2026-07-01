@@ -193,9 +193,9 @@ export default function ChatPage() {
 
   return (
     <AppLayout>
-
+      <div className="absolute inset-0 flex flex-col">
       {/* Header */}
-      <div className="relative z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3 sticky top-0">
+      <div className="relative z-10 shrink-0 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3">
         <div className="max-w-4xl mx-auto flex items-center gap-3">
           <Link href={`/document/${id}`}
             className="p-2 rounded-xl hover:bg-muted transition-colors">
@@ -212,7 +212,7 @@ export default function ChatPage() {
       </div>
 
       {/* Messages */}
-      <div id="chat-scroll-container" className="relative z-0 flex-1 overflow-y-auto px-4 pt-8 pb-32 bg-background">
+      <div id="chat-scroll-container" className="relative z-0 flex-1 overflow-y-auto px-4 pt-8 pb-4 bg-background">
         <div className="max-w-3xl mx-auto space-y-8">
           {messages.length === 0 && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20">
@@ -253,7 +253,7 @@ export default function ChatPage() {
       </div>
 
       {/* Floating Input Area (Claude-style) */}
-      <div className="sticky bottom-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-t from-background via-background to-transparent z-20">
+      <div className="shrink-0 p-4 md:p-6 bg-gradient-to-t from-background via-background to-transparent z-20">
         <div className="max-w-3xl mx-auto relative">
           <div className="relative flex items-end shadow-lg shadow-black/5 dark:shadow-black/20 rounded-2xl bg-card border border-border overflow-hidden focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10 transition-all">
             <textarea 
@@ -285,6 +285,7 @@ export default function ChatPage() {
             AI can make mistakes. Consider verifying important information.
           </p>
         </div>
+      </div>
       </div>
       
       {/* Document Viewer Modal */}
