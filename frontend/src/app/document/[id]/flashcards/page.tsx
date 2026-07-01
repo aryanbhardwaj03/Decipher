@@ -102,8 +102,8 @@ export default function FlashcardsPage({ params }: { params: Promise<{ id: strin
                 transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
                 className="relative w-full h-64 cursor-pointer" style={{ transformStyle: "preserve-3d" }}>
                 {/* Front */}
-                <div className="absolute inset-0 rounded-2xl bg-card border border-border p-6 flex flex-col items-center justify-center text-center"
-                  style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}>
+                <div className="absolute inset-0 rounded-2xl bg-card border border-border p-6 flex flex-col items-center justify-center text-center z-10"
+                  style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", transform: "rotateY(0deg)" }}>
                   {card?.difficulty && (
                     <span className={cn("absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize", diffColors[card.difficulty] || diffColors.medium)}>
                       {card.difficulty}
@@ -114,7 +114,7 @@ export default function FlashcardsPage({ params }: { params: Promise<{ id: strin
                   <p className="text-[10px] text-muted-foreground mt-4">Click to flip</p>
                 </div>
                 {/* Back */}
-                <div className="absolute inset-0 rounded-2xl bg-primary/[0.04] border border-primary/15 p-6 flex flex-col items-center justify-center text-center"
+                <div className="absolute inset-0 rounded-2xl bg-card border border-primary/30 p-6 flex flex-col items-center justify-center text-center z-0"
                   style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
                   <p className="text-[10px] text-primary uppercase tracking-widest mb-3">Answer</p>
                   <p className="text-sm font-semibold leading-relaxed">{card?.back}</p>
