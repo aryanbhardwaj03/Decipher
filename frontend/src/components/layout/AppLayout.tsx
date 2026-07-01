@@ -8,6 +8,9 @@ import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UploadZone } from "@/components/document/UploadZone";
 import { AnimatePresence, motion } from "framer-motion";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { apiGetDocuments } from "@/lib/api";
+import { showToast } from "@/components/ui/Toaster";
 
 export function AppLayout({ children, onUploadClick }: { children: React.ReactNode; onUploadClick?: () => void }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -16,11 +19,37 @@ export function AppLayout({ children, onUploadClick }: { children: React.ReactNo
   const pathname = usePathname();
   const router = useRouter();
 
-  const handleUpload = () => {
+  const { user, isGuest } = useAuth();
+  const [isCheckingLimit, setIsCheckingLimit] = useState(false);
+
+  const handleUpload = async () => {
     if (onUploadClick) {
       onUploadClick();
-    } else {
+      return;
+    }
+
+    if (isCheckingLimit) return;
+    
+    setIsCheckingLimit(true);
+    try {
+      const data = await apiGetDocuments();
+      const count = data.documents.length;
+      const maxDocs = isGuest ? 10 : (user?.plan === "Basic" || !user?.plan ? 30 : Infinity);
+      
+      if (count >= maxDocs) {
+        showToast(
+          isGuest 
+            ? "Guest storage limit reached (10 documents). Please sign up to upload more." 
+            : "Storage limit reached (30 documents). Please upgrade to Plus or Pro.", 
+          "error"
+        );
+        return;
+      }
       setShowGlobalUpload(true);
+    } catch {
+      setShowGlobalUpload(true);
+    } finally {
+      setIsCheckingLimit(false);
     }
   };
 
