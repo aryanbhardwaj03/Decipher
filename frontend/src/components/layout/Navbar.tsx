@@ -34,9 +34,7 @@ export function Navbar() {
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-500 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
+            <img src="/logo-mark.png" alt="Decipher Logo" className="w-8 h-8 object-contain group-hover:scale-105 transition-transform" />
             <span className="text-base font-bold tracking-tight gradient-text hidden sm:block">
               Decipher
             </span>

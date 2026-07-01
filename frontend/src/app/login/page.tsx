@@ -103,9 +103,7 @@ export default function LoginPage() {
 
         {/* Logo */}
         <div className="flex items-center gap-2.5 mb-8">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-sm shadow-orange-500/20" style={{ background: "var(--gradient-brand)" }}>
-            <Sparkles className="h-5 w-5 text-white" />
-          </div>
+          <img src="/logo-mark.png" alt="Decipher Logo" className="w-9 h-9 object-contain" />
           <span className="text-xl font-bold tracking-tight gradient-text">Decipher</span>
         </div>
 
