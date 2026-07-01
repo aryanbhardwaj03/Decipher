@@ -160,11 +160,14 @@ class LLMEngine:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
 
+        # Cap max_tokens to 3000 to avoid Groq's 6000 TPM free tier limit
+        groq_max = min(max_tokens, 3000)
+
         kwargs = {
             "model": settings.GROQ_MODEL,
             "messages": messages,
             "temperature": temperature,
-            "max_tokens": max_tokens,
+            "max_tokens": groq_max,
         }
         if format == "json":
             kwargs["response_format"] = {"type": "json_object"}
@@ -179,11 +182,14 @@ class LLMEngine:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
 
+        # Cap max_tokens to 3000 to avoid Groq's 6000 TPM free tier limit
+        groq_max = min(max_tokens, 3000)
+
         stream = client.chat.completions.create(
             model=settings.GROQ_MODEL,
             messages=messages,
             temperature=temperature,
-            max_tokens=max_tokens,
+            max_tokens=groq_max,
             stream=True,
         )
         for chunk in stream:
