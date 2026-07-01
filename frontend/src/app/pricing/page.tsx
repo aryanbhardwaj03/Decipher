@@ -7,13 +7,15 @@ import { Button } from "@/components/ui/Button";
 import { showToast } from "@/components/ui/Toaster";
 import { motion } from "framer-motion";
 import Script from "next/script";
+import { useRouter } from "next/navigation";
 
 import { useAuth } from "@/components/providers/AuthProvider";
 import { apiCreateOrder, apiVerifyPayment, apiGetXpHistory } from "@/lib/api";
 import type { XPHistoryResponse } from "@/types";
 
 export default function PricingPage() {
-  const { user, refreshUser } = useAuth();
+  const { user, isGuest, refreshUser } = useAuth();
+  const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
   const [xpData, setXpData] = useState<XPHistoryResponse | null>(null);
 
@@ -26,6 +28,12 @@ export default function PricingPage() {
   const hasXpPlus = (xpData?.weekly_xp || 0) >= 100;
 
   const handleUpgrade = async (name: string, price: number) => {
+    if (!user || isGuest) {
+      showToast("Please login first to upgrade.", "warning");
+      router.push("/login");
+      return;
+    }
+
     setIsProcessing(true);
     try {
       // 1. Call backend to create Razorpay Order
