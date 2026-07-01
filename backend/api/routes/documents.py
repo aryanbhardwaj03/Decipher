@@ -329,6 +329,7 @@ def process_document_task(doc_id: str, file_path: str, file_type: str):
                     height=img_info.get("size", (0, 0))[1] if "size" in img_info else 0,
                 )
             except Exception as e:
+                db.rollback()
                 logger.warning(f"Failed to save figure {i}: {e}")
 
         # Estimate reading difficulty
@@ -357,8 +358,17 @@ def process_document_task(doc_id: str, file_path: str, file_type: str):
 
     except Exception as e:
         logger.error(f"Document processing failed for {doc_id}: {e}")
-        crud.update_document_status(
-            db=db, doc_id=doc_id, status="error", error_message=str(e)
-        )
+        try:
+            db.rollback()
+        except:
+            pass
+            
+        error_db = SessionLocal()
+        try:
+            crud.update_document_status(
+                db=error_db, doc_id=doc_id, status="error", error_message=str(e)
+            )
+        finally:
+            error_db.close()
     finally:
         db.close()

@@ -45,8 +45,8 @@ class Settings(BaseSettings):
     LLM_MAX_TOKENS: int = 4096
 
     # ── Embeddings ────────────────────────────────────────
-    EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
-    EMBEDDING_DIMENSION: int = 384
+    EMBEDDING_MODEL: str = "models/text-embedding-004"
+    EMBEDDING_DIMENSION: int = 768
     EMBEDDING_DEVICE: str = "cpu"
 
     # ── Chunking ──────────────────────────────────────────
