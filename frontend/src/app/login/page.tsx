@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Sparkles, Mail, Lock, User, Eye, EyeOff, ArrowRight, ArrowLeft } from "lucide-react";
@@ -19,6 +19,12 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.search.includes("mode=signup")) {
+      setIsLogin(false);
+    }
+  }, []);
 
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -100,7 +106,7 @@ export default function LoginPage() {
           <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-sm shadow-orange-500/20" style={{ background: "var(--gradient-brand)" }}>
             <Sparkles className="h-5 w-5 text-white" />
           </div>
-          <span className="text-xl font-bold tracking-tight gradient-text">StudyAI</span>
+          <span className="text-xl font-bold tracking-tight gradient-text">Decipher</span>
         </div>
 
         {/* Heading */}

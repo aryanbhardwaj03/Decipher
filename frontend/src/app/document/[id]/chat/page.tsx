@@ -206,7 +206,7 @@ export default function ChatPage() {
           </div>
           <div>
             <h1 className="text-[15px] font-semibold text-foreground leading-tight">Document Chat</h1>
-            <p className="text-[12px] text-muted-foreground">Powered by StudyAI</p>
+            <p className="text-[12px] text-muted-foreground">Powered by Decipher</p>
           </div>
         </div>
       </div>

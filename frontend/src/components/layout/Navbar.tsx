@@ -38,7 +38,7 @@ export function Navbar() {
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             <span className="text-base font-bold tracking-tight gradient-text hidden sm:block">
-              StudyAI
+              Decipher
             </span>
           </Link>
 

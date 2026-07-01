@@ -33,7 +33,7 @@ export default function OnboardingPage() {
         <div className="flex items-center gap-4">
           <ThemeToggle />
           <Link href="/login" className="text-sm font-semibold hover:text-primary transition-colors">Login</Link>
-          <Link href="/login" className="rounded-md bg-primary px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90">
+          <Link href="/login?mode=signup" className="rounded-md bg-primary px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90">
             Sign up
           </Link>
           <button className="ml-2 rounded hover:bg-muted p-1">
