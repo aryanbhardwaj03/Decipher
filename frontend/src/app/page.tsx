@@ -22,6 +22,30 @@ export default function OnboardingPage() {
     { name: "Flashcards", icon: <Sparkles className="w-4 h-4" />, href: "/tool/flashcards" },
   ];
 
+  const MEGA_MENU_CATEGORIES = [
+    {
+      title: "STUDY TOOLS",
+      tools: [
+        { name: "AI Summarizer", icon: <FileText className="w-4 h-4 text-emerald-500" />, href: "/tool/summary" },
+        { name: "Mind Maps", icon: <Share2 className="w-4 h-4 text-pink-500" />, href: "/tool/notes" },
+      ]
+    },
+    {
+      title: "ASSESSMENT",
+      tools: [
+        { name: "Generate Quiz", icon: <CheckSquare className="w-4 h-4 text-orange-500" />, href: "/tool/quiz" },
+        { name: "Flashcards", icon: <Sparkles className="w-4 h-4 text-indigo-500" />, href: "/tool/flashcards" },
+      ]
+    },
+    {
+      title: "DATA & ANALYSIS",
+      tools: [
+        { name: "Ask Questions", icon: <MessageSquare className="w-4 h-4 text-blue-500" />, href: "/tool/chat" },
+        { name: "Extract Data", icon: <Database className="w-4 h-4 text-purple-500" />, href: "/tool/figures" },
+      ]
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Navbar */}
@@ -40,7 +64,7 @@ export default function OnboardingPage() {
             <div className="relative" onMouseLeave={() => setShowToolsDropdown(false)}>
               <button 
                 onMouseEnter={() => setShowToolsDropdown(true)}
-                className="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer"
+                className="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer py-2"
               >
                 All Tools <span className="text-[10px]">▼</span>
               </button>
@@ -50,13 +74,22 @@ export default function OnboardingPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full left-0 mt-4 w-48 bg-card border border-border rounded-xl shadow-lg p-2 z-50 flex flex-col gap-1"
+                    className="absolute top-full left-1/2 -translate-x-1/2 pt-2 w-[550px] z-50 cursor-default"
                   >
-                    {ALL_TOOLS.map(tool => (
-                      <Link key={tool.href} href={tool.href} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted text-sm text-foreground font-medium transition-colors normal-case tracking-normal">
-                        {tool.icon} {tool.name}
-                      </Link>
-                    ))}
+                    <div className="bg-card border border-border rounded-xl shadow-2xl p-6 grid grid-cols-3 gap-8">
+                      {MEGA_MENU_CATEGORIES.map((category) => (
+                        <div key={category.title} className="flex flex-col gap-4">
+                          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{category.title}</h3>
+                          <div className="flex flex-col gap-2">
+                            {category.tools.map((tool) => (
+                              <Link key={tool.href} href={tool.href} className="flex items-center gap-2 py-1.5 rounded-lg hover:text-primary transition-colors text-sm font-semibold normal-case tracking-normal">
+                                {tool.icon} {tool.name}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -83,13 +116,15 @@ export default function OnboardingPage() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
-                  className="absolute top-full right-0 mt-4 w-48 bg-card border border-border rounded-xl shadow-lg p-2 z-50 flex flex-col gap-1"
+                  className="absolute top-full right-0 pt-2 w-48 z-50 cursor-default"
                 >
-                  {ALL_TOOLS.map(tool => (
-                    <Link key={tool.href} href={tool.href} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted text-sm text-foreground font-medium transition-colors normal-case tracking-normal">
-                      {tool.icon} {tool.name}
-                    </Link>
-                  ))}
+                  <div className="bg-card border border-border rounded-xl shadow-lg p-2 flex flex-col gap-1">
+                    {ALL_TOOLS.map(tool => (
+                      <Link key={tool.href} href={tool.href} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted text-sm text-foreground font-medium transition-colors normal-case tracking-normal">
+                        {tool.icon} {tool.name}
+                      </Link>
+                    ))}
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
