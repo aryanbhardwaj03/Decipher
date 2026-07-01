@@ -6,6 +6,7 @@ Upload, list, get, delete, and manage documents.
 import base64
 import logging
 from pathlib import Path
+import threading
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks
 from fastapi.responses import FileResponse
@@ -22,6 +23,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/documents", tags=["documents"])
 
 ALLOWED_EXTENSIONS = {".pdf", ".docx", ".pptx", ".ppt", ".doc", ".txt", ".md"}
+
+# Global lock to prevent parallel processing from OOMing the 512MB server
+PROCESSING_LOCK = threading.Lock()
 
 
 # ── Schemas ───────────────────────────────────────────────────────────────
@@ -295,8 +299,9 @@ def process_document_task(doc_id: str, file_path: str, file_type: str):
     gc.collect()
     db = SessionLocal()
     try:
-        processor = UniversalDocumentProcessor()
-        result = processor.process(file_path, file_type)
+        with PROCESSING_LOCK:
+            processor = UniversalDocumentProcessor()
+            result = processor.process(file_path, file_type)
         
         gc.collect()
 
