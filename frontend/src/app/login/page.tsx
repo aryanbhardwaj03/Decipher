@@ -233,15 +233,6 @@ export default function LoginPage() {
           </button>
         </p>
 
-        {/* Continue as guest */}
-        <div className="mt-6 pt-5 border-t border-border">
-          <button
-            onClick={() => router.push("/")}
-            className="w-full py-2.5 rounded-xl text-sm font-medium border border-border bg-card hover:bg-muted transition-all text-foreground"
-          >
-            Continue without account
-          </button>
-        </div>
       </motion.div>
     </div>
   );
