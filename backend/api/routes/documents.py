@@ -311,10 +311,9 @@ def process_document_task(doc_id: str, file_path: str, file_type: str):
         # Store figures
         for i, img_info in enumerate(result.get("images", [])):
             try:
-                import io
-                buf = io.BytesIO()
-                img_info["image"].save(buf, format="PNG")
-                img_b64 = base64.b64encode(buf.getvalue()).decode()
+                img_b64 = img_info.get("base64", "")
+                if not img_b64:
+                    continue
 
                 crud.create_figure(
                     db=db,

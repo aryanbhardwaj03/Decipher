@@ -136,12 +136,21 @@ class UniversalDocumentProcessor:
                         image.thumbnail((max_dim, max_dim))
                         
                     if image.width >= 50 and image.height >= 50:
+                        import base64
+                        buf = io.BytesIO()
+                        image.save(buf, format="PNG")
+                        img_b64 = base64.b64encode(buf.getvalue()).decode()
+                        
                         result["images"].append({
-                            "image": image,
+                            "base64": img_b64,
                             "page": page_num + 1,
                             "index": img_idx,
                             "size": (image.width, image.height),
                         })
+                        
+                    # Explicitly delete the image to free memory immediately
+                    del image
+                    del base_image
                 except Exception as e:
                     logger.warning(f"Failed to extract image: {e}")
                     
