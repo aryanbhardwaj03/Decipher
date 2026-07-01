@@ -253,7 +253,7 @@ export default function ChatPage() {
       </div>
 
       {/* Floating Input Area (Claude-style) */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-t from-background via-background to-transparent z-20">
+      <div className="sticky bottom-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-t from-background via-background to-transparent z-20">
         <div className="max-w-3xl mx-auto relative">
           <div className="relative flex items-end shadow-lg shadow-black/5 dark:shadow-black/20 rounded-2xl bg-card border border-border overflow-hidden focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10 transition-all">
             <textarea 
