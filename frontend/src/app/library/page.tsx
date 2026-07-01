@@ -56,23 +56,27 @@ export default function LibraryPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this document?")) return;
+    const previousDocs = documents;
+    setDocuments((prev) => prev.filter((d) => d.id !== id));
     try {
       await apiDeleteDocument(id);
-      setDocuments((prev) => prev.filter((d) => d.id !== id));
       showToast("Document deleted", "success");
     } catch {
+      setDocuments(previousDocs);
       showToast("Failed to delete", "error");
     }
   };
 
   const handleToggleFavorite = async (id: string) => {
+    const previousDocs = documents;
+    setDocuments((prev) => prev.map((d) => 
+      d.id === id ? { ...d, is_favorite: !d.is_favorite } : d
+    ));
     try {
-      const result = await apiToggleFavorite(id);
-      setDocuments((prev) =>
-        prev.map((d) => (d.id === id ? { ...d, is_favorite: result.is_favorite } : d))
-      );
+      await apiToggleFavorite(id);
     } catch {
-      showToast("Failed to update", "error");
+      setDocuments(previousDocs);
+      showToast("Failed to update favorite status", "error");
     }
   };
 

@@ -4,8 +4,9 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { apiGetDocuments } from "@/lib/api";
+import { apiGetDocuments, apiDeleteDocument, apiToggleFavorite } from "@/lib/api";
 import { DocumentCard } from "@/components/document/DocumentCard";
+import { showToast } from "@/components/ui/Toaster";
 import { ArrowLeft, MessageSquare, FileText, StickyNote, Layers, CheckSquare, Image as ImageIcon, Search } from "lucide-react";
 import Link from "next/link";
 
@@ -61,6 +62,32 @@ export default function ToolSelectorPage() {
     fetchDocuments();
   }, [fetchDocuments]);
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this document?")) return;
+    const previousDocs = documents;
+    setDocuments((prev) => prev.filter((d) => d.id !== id));
+    try {
+      await apiDeleteDocument(id);
+      showToast("Document deleted", "success");
+    } catch {
+      setDocuments(previousDocs);
+      showToast("Failed to delete", "error");
+    }
+  };
+
+  const handleToggleFavorite = async (id: string) => {
+    const previousDocs = documents;
+    setDocuments((prev) => prev.map((d) => 
+      d.id === id ? { ...d, is_favorite: !d.is_favorite } : d
+    ));
+    try {
+      await apiToggleFavorite(id);
+    } catch {
+      setDocuments(previousDocs);
+      showToast("Failed to update favorite status", "error");
+    }
+  };
+
   useEffect(() => {
     if (documents.some((d) => d.status === "processing")) {
       const interval = setInterval(fetchDocuments, 3000);
@@ -104,6 +131,8 @@ export default function ToolSelectorPage() {
                     doc={doc} 
                     index={i}
                     href={`/document/${doc.id}/${toolName}`}
+                    onDelete={handleDelete}
+                    onToggleFavorite={handleToggleFavorite}
                   />
                 </div>
               ))}
