@@ -189,7 +189,8 @@ class UniversalDocumentProcessor:
                 
                 for p_num in batch:
                     page = doc[p_num]
-                    pix = page.get_pixmap()
+                    # Use a fixed low DPI to prevent OOM on massive scanned pages
+                    pix = page.get_pixmap(dpi=72)
                     img_bytes = pix.tobytes("jpeg")
                     image_parts.append(img_bytes)
                 

@@ -1,4 +1,4 @@
-﻿import httpx
+import httpx
 import logging
 from config import settings
 
@@ -50,10 +50,14 @@ class GeminiREST:
         model_path = model if model.startswith("models/") else f"models/{model}"
         url = f"{self.base_url}/{model_path.replace('models/', '')}:generateContent?key={self.api_key}"
         
+        import base64
         parts = []
         for c in contents:
             if isinstance(c, str):
                 parts.append({"text": c})
+            elif isinstance(c, bytes):
+                b64_data = base64.b64encode(c).decode('utf-8')
+                parts.append({"inlineData": {"mimeType": "image/jpeg", "data": b64_data}})
             elif isinstance(c, dict) and "mime_type" in c:
                 parts.append({"inlineData": {"mimeType": c["mime_type"], "data": c["data"]}})
                 
