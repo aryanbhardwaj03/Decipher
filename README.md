@@ -1,3 +1,4 @@
+
 ---
 title: Decipher Backend
 emoji: 🚀
@@ -5,7 +6,6 @@ colorFrom: blue
 colorTo: indigo
 sdk: docker
 app_port: 7860
-dockerfile: backend/Dockerfile
 ---
 
 # AI-Summarizer
