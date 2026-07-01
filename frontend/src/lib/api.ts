@@ -63,8 +63,13 @@ async function apiFetch(
   });
 
   if (response.status === 401) {
-    clearToken();
-    throw new Error("Session expired. Continue as guest or sign in again.");
+    if (!endpoint.startsWith("/api/auth/")) {
+      const token = getToken();
+      if (token) {
+        clearToken();
+        throw new Error("Session expired. Continue as guest or sign in again.");
+      }
+    }
   }
 
   return response;
