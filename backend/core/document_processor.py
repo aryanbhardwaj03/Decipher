@@ -125,20 +125,23 @@ class UniversalDocumentProcessor:
                     image = Image.open(io.BytesIO(base_image["image"]))
                     
                     # Prevent OOM by skipping massive images instead of trying to resize them
-                    # Decoding a 4000x4000 image takes ~50MB of RAM
-                    if image.width > 2000 or image.height > 2000:
+                    if image.width > 1200 or image.height > 1200:
                         logger.warning(f"Skipping extremely large image ({image.width}x{image.height}) to prevent OOM.")
+                        del image
+                        del base_image
                         continue
                         
                     # Still resize moderately large images to save space
-                    max_dim = 1024
+                    max_dim = 800
                     if image.width > max_dim or image.height > max_dim:
                         image.thumbnail((max_dim, max_dim))
                         
                     if image.width >= 50 and image.height >= 50:
                         import base64
                         buf = io.BytesIO()
-                        image.save(buf, format="PNG")
+                        if image.mode in ('RGBA', 'P', 'LA'):
+                            image = image.convert('RGB')
+                        image.save(buf, format="JPEG", quality=70)
                         img_b64 = base64.b64encode(buf.getvalue()).decode()
                         
                         result["images"].append({
@@ -159,11 +162,15 @@ class UniversalDocumentProcessor:
             
             all_text[page_num + 1] = text
 
+            if page_num % 5 == 0:
+                import gc
+                gc.collect()
+
         if pages_needing_ocr:
             logger.info(f"{len(pages_needing_ocr)} pages need OCR. Batching to Gemini.")
             # Use lightweight REST client instead of heavy SDK
             model_name = "gemini-1.5-flash"
-            batch_size = 10
+            batch_size = 5
             for i in range(0, len(pages_needing_ocr), batch_size):
                 batch = pages_needing_ocr[i:i + batch_size]
                 image_parts = []
