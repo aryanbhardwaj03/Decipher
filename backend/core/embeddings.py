@@ -40,6 +40,10 @@ class EmbeddingEngine:
         if not texts:
             return np.array([])
             
+        if not settings.GEMINI_API_KEY:
+            logger.error("GEMINI_API_KEY missing. Returning zero embeddings to prevent hang.")
+            return np.zeros((len(texts), settings.EMBEDDING_DIMENSION))
+            
         embeddings = []
         # Process in batches to avoid rate limits or payload limits
         for i in range(0, len(texts), batch_size):
