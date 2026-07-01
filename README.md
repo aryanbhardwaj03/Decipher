@@ -5,7 +5,7 @@ colorFrom: blue
 colorTo: indigo
 sdk: docker
 app_port: 7860
-docker_file: backend/Dockerfile
+dockerfile: backend/Dockerfile
 ---
 
 # AI-Summarizer
