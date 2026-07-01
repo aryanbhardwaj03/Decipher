@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 import { FileText, Sparkles, Brain, CheckCircle2, AlertTriangle, LucideIcon, Info, Layers } from "lucide-react";
 import { showToast } from "@/components/ui/Toaster";
 
