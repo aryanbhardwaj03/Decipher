@@ -69,36 +69,38 @@ class LLMEngine:
 
     def _get_gemini(self):
         if self._gemini_model is None:
-            import google.generativeai as genai
-            genai.configure(api_key=settings.GEMINI_API_KEY)
-            self._gemini_model = genai.GenerativeModel("gemini-2.5-flash")
+            from core.gemini_rest import genai_rest
+            self._gemini_model = "gemini-2.5-flash"
         return self._gemini_model
 
     def _gemini_generate(self, prompt, system_prompt, temperature, max_tokens, format=None):
+        from core.gemini_rest import genai_rest
         model = self._get_gemini()
-        full_prompt = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
         
-        config = {"temperature": temperature, "max_output_tokens": max_tokens}
-        if format == "json":
-            config["response_mime_type"] = "application/json"
-            
-        response = model.generate_content(
-            full_prompt,
-            generation_config=config,
+        response = genai_rest.generate_content(
+            model=model,
+            contents=[system_prompt + "\n\n" + prompt],
+            temperature=temperature,
+            max_tokens=max_tokens,
+            format=format
         )
         return response.text
 
     def _gemini_stream(self, prompt, system_prompt, temperature, max_tokens):
+        from core.gemini_rest import genai_rest
         model = self._get_gemini()
-        full_prompt = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
-        response = model.generate_content(
-            full_prompt,
-            generation_config={"temperature": temperature, "max_output_tokens": max_tokens},
-            stream=True,
+        
+        # Simple fallback for stream since REST wrapper doesn't do SSE yet
+        response = genai_rest.generate_content(
+            model=model,
+            contents=[system_prompt + "\n\n" + prompt],
+            temperature=temperature,
+            max_tokens=max_tokens
         )
-        for chunk in response:
-            if chunk.text:
-                yield chunk.text
+        
+        # Yield the whole text in one chunk
+        if response and hasattr(response, 'text') and response.text:
+            yield response.text
 
     # ── OpenAI ────────────────────────────────────────────────────────────
 

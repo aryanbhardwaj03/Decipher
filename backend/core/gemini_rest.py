@@ -1,0 +1,86 @@
+﻿import httpx
+import logging
+from config import settings
+
+logger = logging.getLogger(__name__)
+
+class GeminiREST:
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+        self.base_url = "https://generativelanguage.googleapis.com/v1beta/models"
+
+    def embed_content(self, model: str, content: list[str], task_type: str = "retrieval_document"):
+        if not self.api_key:
+            return {"embedding": [[0.0] * 768 for _ in content]}
+        
+        model_path = model if model.startswith("models/") else f"models/{model}"
+        url = f"{self.base_url}/{model_path.replace('models/', '')}:batchEmbedContents?key={self.api_key}"
+        
+        requests = []
+        for text in content:
+            requests.append({
+                "model": model_path,
+                "content": {"parts": [{"text": text}]},
+                "taskType": task_type.upper()
+            })
+            
+        payload = {"requests": requests}
+        
+        try:
+            with httpx.Client(timeout=30.0) as client:
+                response = client.post(url, json=payload)
+                response.raise_for_status()
+                data = response.json()
+                
+                embeddings = []
+                for emb in data.get("embeddings", []):
+                    embeddings.append(emb.get("values", []))
+                
+                if not embeddings and content:
+                     return {"embedding": [[0.0] * 768 for _ in content]}
+                return {"embedding": embeddings}
+        except Exception as e:
+            logger.error(f"Gemini REST embedding failed: {e}")
+            raise e
+
+    def generate_content(self, model: str, contents: list, temperature: float = 0.7, max_tokens: int = 1000, format: str = None):
+        if not self.api_key:
+            return type("Response", (), {"text": ""})()
+            
+        model_path = model if model.startswith("models/") else f"models/{model}"
+        url = f"{self.base_url}/{model_path.replace('models/', '')}:generateContent?key={self.api_key}"
+        
+        parts = []
+        for c in contents:
+            if isinstance(c, str):
+                parts.append({"text": c})
+            elif isinstance(c, dict) and "mime_type" in c:
+                parts.append({"inlineData": {"mimeType": c["mime_type"], "data": c["data"]}})
+                
+        payload = {
+            "contents": [{"parts": parts}],
+            "generationConfig": {
+                "temperature": temperature,
+                "maxOutputTokens": max_tokens
+            }
+        }
+        
+        if format == "json":
+            payload["generationConfig"]["responseMimeType"] = "application/json"
+        
+        try:
+            with httpx.Client(timeout=60.0) as client:
+                response = client.post(url, json=payload)
+                response.raise_for_status()
+                data = response.json()
+                
+                try:
+                    text = data["candidates"][0]["content"]["parts"][0]["text"]
+                except (KeyError, IndexError):
+                    text = ""
+                return type("Response", (), {"text": text})()
+        except Exception as e:
+            logger.error(f"Gemini REST generateContent failed: {e}")
+            raise e
+            
+genai_rest = GeminiREST(settings.GEMINI_API_KEY)

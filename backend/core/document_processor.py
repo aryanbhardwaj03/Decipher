@@ -134,8 +134,8 @@ class UniversalDocumentProcessor:
         
         has_gemini = bool(settings.GEMINI_API_KEY)
         if has_gemini:
-            import google.generativeai as genai
-            genai.configure(api_key=settings.GEMINI_API_KEY)
+            from core.gemini_rest import genai_rest
+            has_gemini = True
 
         pages_needing_ocr = []
 
@@ -180,28 +180,25 @@ class UniversalDocumentProcessor:
 
         if pages_needing_ocr:
             logger.info(f"{len(pages_needing_ocr)} pages need OCR. Batching to Gemini.")
-            model = genai.GenerativeModel("gemini-1.5-flash")
+            # Use lightweight REST client instead of heavy SDK
+            model_name = "gemini-1.5-flash"
             batch_size = 10
             for i in range(0, len(pages_needing_ocr), batch_size):
                 batch = pages_needing_ocr[i:i + batch_size]
-                prompt_parts = ["Extract all text from the following scanned document pages. Separate the text for each page clearly using the exact format '---PAGE_X---' (where X is the page number)."]
+                image_parts = []
                 
                 for p_num in batch:
                     page = doc[p_num]
                     pix = page.get_pixmap()
                     img_bytes = pix.tobytes("jpeg")
-                    img = Image.open(io.BytesIO(img_bytes))
-                    max_dim = 1000
-                    if img.width > max_dim or img.height > max_dim:
-                        img.thumbnail((max_dim, max_dim))
-                    prompt_parts.append(f"Page {p_num + 1}:")
-                    prompt_parts.append(img)
+                    image_parts.append(img_bytes)
                 
                 try:
                     logger.info(f"Sending OCR batch {i//batch_size + 1}")
-                    response = model.generate_content(prompt_parts)
-                    # Simple parsing: assign all generated text to the first page of the batch so it gets chunked.
-                    # Or we can split by '---PAGE_' if Gemini followed instructions.
+                    response = genai_rest.generate_content(
+                        model=model_name, 
+                        contents=["Extract all text from these document pages. Output ONLY the extracted text, no commentary.", *image_parts]
+                    )
                     # To be safe, just append it all to the first page of the batch.
                     all_text[batch[0] + 1] = response.text.strip()
                 except Exception as e:
