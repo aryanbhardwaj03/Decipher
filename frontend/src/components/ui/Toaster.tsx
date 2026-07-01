@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CheckCircle2, AlertCircle, Info, AlertTriangle, X } from "lucide-react";
 
 export function Toaster() {
   const [toasts, setToasts] = useState<{ id: number; message: string; type: string }[]>([]);
@@ -18,23 +19,37 @@ export function Toaster() {
     return () => window.removeEventListener("toast" as any, handler as EventListener);
   }, []);
 
-  const typeStyles: Record<string, string> = {
-    success: "bg-emerald-500/90 text-white",
-    error: "bg-red-500/90 text-white",
-    info: "bg-primary/90 text-white",
-    warning: "bg-amber-500/90 text-white",
-  };
-
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
-      {toasts.map((toast) => (
-        <div
-          key={toast.id}
-          className={`px-4 py-3 rounded-xl shadow-lg text-sm font-medium animate-[slideInRight_0.3s_ease-out] ${typeStyles[toast.type] || typeStyles.info}`}
-        >
-          {toast.message}
-        </div>
-      ))}
+    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-3">
+      {toasts.map((toast) => {
+        const Icon = toast.type === "success" ? CheckCircle2 :
+                     toast.type === "error" ? AlertCircle :
+                     toast.type === "warning" ? AlertTriangle : Info;
+                     
+        const iconColor = toast.type === "success" ? "text-emerald-500" :
+                          toast.type === "error" ? "text-red-500" :
+                          toast.type === "warning" ? "text-amber-500" : "text-primary";
+
+        return (
+          <div
+            key={toast.id}
+            className="flex items-center gap-3 px-4 py-3 bg-card border border-border rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] min-w-[300px] animate-[slideInRight_0.3s_ease-out]"
+          >
+            <div className={`${iconColor} bg-background rounded-full p-0.5`}>
+              <Icon className="w-5 h-5" />
+            </div>
+            <span className="text-[14px] font-medium text-foreground flex-1 pr-2">
+              {toast.message}
+            </span>
+            <button 
+              onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }
