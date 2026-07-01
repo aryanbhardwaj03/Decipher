@@ -290,11 +290,15 @@ def process_document_task(doc_id: str, file_path: str, file_type: str):
     from db.database import SessionLocal
     from core.document_processor import UniversalDocumentProcessor
     from core.vector_store import get_vector_store
+    import gc
 
+    gc.collect()
     db = SessionLocal()
     try:
         processor = UniversalDocumentProcessor()
         result = processor.process(file_path, file_type)
+        
+        gc.collect()
 
         # Index chunks in vector store
         vs = get_vector_store()
@@ -328,6 +332,9 @@ def process_document_task(doc_id: str, file_path: str, file_type: str):
         word_count = len(total_text.split())
         avg_word_len = sum(len(w) for w in total_text.split()) / max(word_count, 1)
         difficulty = "easy" if avg_word_len < 5 else "hard" if avg_word_len > 7 else "medium"
+        
+        del total_text
+        gc.collect()
 
         # Update document status
         crud.update_document_status(
