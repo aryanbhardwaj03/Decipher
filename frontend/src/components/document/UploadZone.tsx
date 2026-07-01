@@ -56,6 +56,13 @@ export function UploadZone({ onUploadComplete, customButton }: UploadZoneProps) 
     const newUploading: UploadingFile[] = validFiles.map((f) => ({ file: f, status: "uploading" as const }));
     setUploading((prev) => [...prev, ...newUploading]);
 
+    // Show Analyzing immediately for the landing page
+    if (customButton) {
+      setIsAnalyzing(true);
+    }
+
+    let anySuccess = false;
+
     for (const item of newUploading) {
       try {
         await apiUploadDocument(item.file);
@@ -67,26 +74,25 @@ export function UploadZone({ onUploadComplete, customButton }: UploadZoneProps) 
           message: `${item.file.name} is now available in your library.`,
           iconName: "FileText"
         });
+        anySuccess = true;
       } catch (err: any) {
         setUploading((prev) => prev.map((u) => u.file === item.file ? { ...u, status: "error" as const, error: err.message } : u));
         showToast(`Failed to upload ${item.file.name}: ${err.message}`, "error");
       }
     }
 
-    // Check if any uploads succeeded
-    const anySuccess = newUploading.some((u) => !u.error);
-    
     if (anySuccess) {
-      if (customButton) {
-        setIsAnalyzing(true);
-      }
+      // If we didn't show analyzing immediately (e.g. not customButton), we show it now if you wanted it that way.
+      // But standard upload zone doesn't use isAnalyzing, only customButton does in the previous code.
+      // Wait, let's keep the logic consistent: only show isAnalyzing if customButton.
       setTimeout(() => {
         setUploading((prev) => prev.filter((u) => u.status === "uploading"));
         onUploadComplete?.();
-      }, customButton ? 2500 : 1500);
+      }, customButton ? 1000 : 1500);
     } else {
       setTimeout(() => {
         setUploading((prev) => prev.filter((u) => u.status === "uploading"));
+        if (customButton) setIsAnalyzing(false); // revert if all failed
       }, 1500);
     }
   };
@@ -135,7 +141,8 @@ export function UploadZone({ onUploadComplete, customButton }: UploadZoneProps) 
         animate={isDragging ? { scale: 1.01 } : { scale: 1 }}
         className={cn(
           "relative transition-all cursor-pointer group flex flex-col items-center justify-center overflow-hidden",
-          customButton ? "border-none p-0" : "border-2 border-dashed rounded-3xl p-10 text-center min-h-[280px]",
+          customButton ? "border-2 border-transparent w-full min-h-[220px] rounded-3xl p-8" : "border-2 border-dashed rounded-3xl p-10 text-center min-h-[280px]",
+          isDragging && customButton ? "border-primary border-dashed bg-primary/[0.05] scale-[1.02]" : "",
           isDragging && !customButton ? "border-primary bg-primary/[0.05] scale-[1.02]" : "",
           !isDragging && !customButton ? "border-border/60 hover:border-primary/50 hover:bg-primary/[0.02] hover:shadow-sm" : ""
         )}
