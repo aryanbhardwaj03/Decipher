@@ -8,30 +8,8 @@ import { useNotifications } from "@/components/providers/NotificationProvider";
 export function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const autoCloseTimer = useRef<NodeJS.Timeout | null>(null);
   
   const { notifications, unreadCount, markAllAsRead, clearAll } = useNotifications();
-  const prevCount = useRef(notifications.length);
-
-  useEffect(() => {
-    // If a new notification was added
-    if (notifications.length > prevCount.current) {
-      setIsOpen(true);
-      
-      // Clear any existing timer
-      if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current);
-      
-      // Auto-close after 4 seconds
-      autoCloseTimer.current = setTimeout(() => {
-        setIsOpen(false);
-      }, 4000);
-    }
-    prevCount.current = notifications.length;
-
-    return () => {
-      if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current);
-    };
-  }, [notifications.length]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -64,9 +42,6 @@ export function NotificationCenter() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.98 }}
             transition={{ duration: 0.15 }}
-            onMouseEnter={() => {
-              if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current);
-            }}
             className="absolute right-0 top-full mt-2 w-[340px] max-h-[30rem] flex flex-col rounded-xl bg-card border border-border shadow-xl overflow-hidden z-50"
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-border">

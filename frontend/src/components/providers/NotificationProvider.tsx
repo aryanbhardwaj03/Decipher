@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { FileText, Sparkles, Brain, CheckCircle2, AlertTriangle, LucideIcon } from "lucide-react";
+import { FileText, Sparkles, Brain, CheckCircle2, AlertTriangle, LucideIcon, Info, Layers } from "lucide-react";
 import { showToast } from "@/components/ui/Toaster";
 
 export type NotificationType = "success" | "info" | "warning";
@@ -33,6 +33,9 @@ const defaultNotifications: AppNotification[] = [
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<AppNotification[]>(defaultNotifications);
+  const [latestNotification, setLatestNotification] = useState<AppNotification | null>(null);
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const autoCloseTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     try {
@@ -59,6 +62,14 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       read: false,
     };
     setNotifications(prev => [newNotif, ...prev]);
+    
+    // Show just this notification in a popup
+    setLatestNotification(newNotif);
+    setIsToastOpen(true);
+    if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current);
+    autoCloseTimer.current = setTimeout(() => {
+      setIsToastOpen(false);
+    }, 4000);
   };
 
   const markAllAsRead = () => {
@@ -85,6 +96,40 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       removeNotification
     }}>
       {children}
+      
+      {/* Floating Individual Notification Popup */}
+      {isToastOpen && latestNotification && (
+        <div 
+          className="fixed bottom-4 right-4 z-50 animate-[slideInRight_0.3s_ease-out]"
+          onMouseEnter={() => { if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current); }}
+          onMouseLeave={() => {
+            autoCloseTimer.current = setTimeout(() => setIsToastOpen(false), 3000);
+          }}
+        >
+          <div className="w-[340px] bg-card border border-border shadow-xl rounded-xl p-4 flex items-start gap-4 cursor-pointer hover:bg-muted/50 transition-colors"
+               onClick={() => setIsToastOpen(false)}>
+            <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center 
+              ${latestNotification.type === 'success' ? 'bg-success/10 text-success' : 
+                latestNotification.type === 'warning' ? 'bg-warning/10 text-warning' : 
+                'bg-primary/10 text-primary'}`}>
+              {React.createElement(
+                { FileText, Sparkles, Brain, CheckCircle2, AlertTriangle, Layers }[latestNotification.iconName as string] || Info,
+                { className: "w-5 h-5" }
+              )}
+            </div>
+            <div className="flex-1 min-w-0 pt-0.5">
+              <p className="text-[14px] font-semibold text-foreground truncate">
+                {latestNotification.title}
+              </p>
+              {latestNotification.message && (
+                <p className="text-[13px] text-muted-foreground mt-0.5 line-clamp-2">
+                  {latestNotification.message}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </NotificationContext.Provider>
   );
 }
