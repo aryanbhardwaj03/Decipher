@@ -1,3 +1,4 @@
+import { showToast } from "@/components/ui/Toaster";
 import { API_BASE } from "./constants";
 
 /** Get stored auth token */
