@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Suspense } from "react";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
@@ -21,7 +20,7 @@ export const metadata: Metadata = {
 
 import { GuestPrompt } from "@/components/layout/GuestPrompt";
 import { NotificationProvider } from "@/components/providers/NotificationProvider";
-import { GoogleAnalytics } from "@/components/providers/GoogleAnalytics";
+import { Analytics } from "@vercel/analytics/next";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import NextTopLoader from "nextjs-toploader";
 
@@ -38,12 +37,10 @@ export default function RootLayout({
             <AuthProvider>
               <NotificationProvider>
                 <NextTopLoader color="#f97316" showSpinner={false} />
-                <Suspense fallback={null}>
-                  <GoogleAnalytics />
-                </Suspense>
                 <ErrorBoundary>
                   {children}
                 </ErrorBoundary>
+                <Analytics />
                 <Toaster />
                 <GuestPrompt />
               </NotificationProvider>
