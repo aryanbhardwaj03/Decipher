@@ -215,3 +215,12 @@ class DocumentChunk(Base):
 
     # Relationships
     document = relationship("Document")
+
+class OTP(Base):
+    __tablename__ = "otps"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    email = Column(String(255), nullable=False, index=True)
+    otp_code = Column(String(6), nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)

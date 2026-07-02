@@ -439,3 +439,33 @@ def migrate_guest_data(db: Session, guest_id: str, new_user_id: str):
     db.query(FlashcardDeck).filter(FlashcardDeck.user_id == guest_id).update({"user_id": new_user_id})
     db.commit()
 
+
+# ═══════════════════════════════════════════════════════════════════════
+#  OTP
+# ═══════════════════════════════════════════════════════════════════════
+
+def create_otp(db: Session, email: str, otp_code: str, expires_at: datetime):
+    from db.models import OTP
+    # Delete existing OTPs for this email to prevent spam
+    db.query(OTP).filter(OTP.email == email).delete()
+    
+    otp = OTP(email=email, otp_code=otp_code, expires_at=expires_at)
+    db.add(otp)
+    db.commit()
+    db.refresh(otp)
+    return otp
+
+def verify_otp(db: Session, email: str, otp_code: str) -> bool:
+    from db.models import OTP
+    otp = db.query(OTP).filter(
+        OTP.email == email, 
+        OTP.otp_code == otp_code,
+        OTP.expires_at > datetime.utcnow()
+    ).first()
+    
+    if otp:
+        db.delete(otp)
+        db.commit()
+        return True
+    return False
+

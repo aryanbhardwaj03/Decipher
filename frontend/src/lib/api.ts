@@ -97,10 +97,19 @@ export async function apiLogin(email: string, password: string) {
   return res.json();
 }
 
-export async function apiRegister(email: string, password: string, name: string) {
+export async function apiSendOtp(email: string) {
+  const res = await apiFetch("/api/auth/send-otp", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+  if (!res.ok) throw new Error((await res.json()).detail || "Failed to send OTP");
+  return res.json();
+}
+
+export async function apiRegister(email: string, password: string, name: string, otp: string) {
   const res = await apiFetch("/api/auth/register", {
     method: "POST",
-    body: JSON.stringify({ email, password, name }),
+    body: JSON.stringify({ email, password, name, otp }),
   });
   if (!res.ok) throw new Error((await res.json()).detail || "Registration failed");
   return res.json();
