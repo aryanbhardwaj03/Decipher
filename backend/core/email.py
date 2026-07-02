@@ -1,40 +1,45 @@
 import os
-import smtplib
 import threading
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import json
 
-SMTP_HOST = os.environ.get("SMTP_HOST", "")
 try:
-    SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
-except ValueError:
-    SMTP_PORT = 587
-SMTP_USER = os.environ.get("SMTP_USER", "")
-SMTP_PASS = os.environ.get("SMTP_PASS", "")
-FROM_EMAIL = os.environ.get("FROM_EMAIL", SMTP_USER)
+    import httpx
+except ImportError:
+    httpx = None
+
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+FROM_EMAIL = os.environ.get("FROM_EMAIL", "onboarding@resend.dev")
 
 
 def _send_email_sync(to_email: str, subject: str, html_content: str):
-    """Internal helper to send HTML emails (runs in background thread)."""
-    if not SMTP_HOST or not SMTP_USER or not SMTP_PASS:
-        print(f"⚠️ SMTP not configured. Skipping email to {to_email}: {subject}")
+    """Send email via Resend HTTP API."""
+    if not RESEND_API_KEY:
+        print(f"⚠️ RESEND_API_KEY not configured. Skipping email to {to_email}: {subject}")
         return
 
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = FROM_EMAIL
-    msg["To"] = to_email
-
-    part = MIMEText(html_content, "html")
-    msg.attach(part)
+    if httpx is None:
+        print(f"⚠️ 'httpx' library not installed. Cannot send email.")
+        return
 
     try:
-        server = smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=10)
-        server.starttls()
-        server.login(SMTP_USER, SMTP_PASS)
-        server.sendmail(FROM_EMAIL, to_email, msg.as_string())
-        server.quit()
-        print(f"✅ Email sent to {to_email}: {subject}")
+        response = httpx.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {RESEND_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "from": FROM_EMAIL,
+                "to": [to_email],
+                "subject": subject,
+                "html": html_content,
+            },
+            timeout=10,
+        )
+        if response.status_code == 200:
+            print(f"✅ Email sent to {to_email}: {subject}")
+        else:
+            print(f"❌ Resend API error ({response.status_code}): {response.text}")
     except Exception as e:
         print(f"❌ Failed to send email to {to_email}: {e}")
 
