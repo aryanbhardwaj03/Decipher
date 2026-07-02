@@ -20,6 +20,7 @@ export const metadata: Metadata = {
 
 import { GuestPrompt } from "@/components/layout/GuestPrompt";
 import { NotificationProvider } from "@/components/providers/NotificationProvider";
+import { GoogleAnalytics } from "@/components/providers/GoogleAnalytics";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import NextTopLoader from "nextjs-toploader";
 
@@ -36,6 +37,7 @@ export default function RootLayout({
             <AuthProvider>
               <NotificationProvider>
                 <NextTopLoader color="#f97316" showSpinner={false} />
+                <GoogleAnalytics />
                 <ErrorBoundary>
                   {children}
                 </ErrorBoundary>
