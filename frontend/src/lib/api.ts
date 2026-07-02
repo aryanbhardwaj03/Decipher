@@ -1,8 +1,6 @@
 import { showToast } from "@/components/ui/Toaster";
 import { API_BASE } from "./constants";
 
-const API_FALLBACK_BASE = "https://ab12361-decipher-backend.hf.space";
-
 /** Get stored auth token */
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -80,22 +78,7 @@ async function apiFetch(
     return response;
   } catch (error: any) {
     if (error.name === "TypeError" && error.message === "Failed to fetch") {
-      if (primaryBase !== API_FALLBACK_BASE) {
-        try {
-          const fallbackResponse = await fetch(`${API_FALLBACK_BASE}${endpoint}`, {
-            cache: "no-store",
-            ...options,
-            headers,
-          });
-
-          return fallbackResponse;
-        } catch {
-          // Fall through to the user-facing error below.
-        }
-      }
-
-      // This is a network or CORS error. Show the primary URL to help debug.
-      showToast(`Network/CORS error connecting to ${primaryBase || "relative URL"}`, "error");
+      showToast(`Network/CORS error connecting to ${primaryBase || "/api"}`, "error");
     }
     throw error;
   }
