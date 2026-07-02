@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
@@ -37,7 +38,9 @@ export default function RootLayout({
             <AuthProvider>
               <NotificationProvider>
                 <NextTopLoader color="#f97316" showSpinner={false} />
-                <GoogleAnalytics />
+                <Suspense fallback={null}>
+                  <GoogleAnalytics />
+                </Suspense>
                 <ErrorBoundary>
                   {children}
                 </ErrorBoundary>
