@@ -1,5 +1,5 @@
 /** API base URL */
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
+export const API_BASE = "";
 
 /** Supported file types */
 export const SUPPORTED_FILE_TYPES = {
