@@ -1,5 +1,6 @@
 import os
 import smtplib
+import threading
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -12,11 +13,11 @@ SMTP_USER = os.environ.get("SMTP_USER", "")
 SMTP_PASS = os.environ.get("SMTP_PASS", "")
 FROM_EMAIL = os.environ.get("FROM_EMAIL", SMTP_USER)
 
-def _send_email(to_email: str, subject: str, html_content: str):
-    """Internal helper to send HTML emails."""
+
+def _send_email_sync(to_email: str, subject: str, html_content: str):
+    """Internal helper to send HTML emails (runs in background thread)."""
     if not SMTP_HOST or not SMTP_USER or not SMTP_PASS:
-        print(f"⚠️ Warning: SMTP not configured. Would have sent email to {to_email}: {subject}")
-        print(f"Content: {html_content}")
+        print(f"⚠️ SMTP not configured. Skipping email to {to_email}: {subject}")
         return
 
     msg = MIMEMultipart("alternative")
@@ -28,7 +29,7 @@ def _send_email(to_email: str, subject: str, html_content: str):
     msg.attach(part)
 
     try:
-        server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
+        server = smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=10)
         server.starttls()
         server.login(SMTP_USER, SMTP_PASS)
         server.sendmail(FROM_EMAIL, to_email, msg.as_string())
@@ -36,6 +37,16 @@ def _send_email(to_email: str, subject: str, html_content: str):
         print(f"✅ Email sent to {to_email}: {subject}")
     except Exception as e:
         print(f"❌ Failed to send email to {to_email}: {e}")
+
+
+def _send_email(to_email: str, subject: str, html_content: str):
+    """Fire-and-forget email sending in a background thread so API never hangs."""
+    thread = threading.Thread(
+        target=_send_email_sync,
+        args=(to_email, subject, html_content),
+        daemon=True,
+    )
+    thread.start()
 
 
 def send_otp_email(to_email: str, otp_code: str):
@@ -98,7 +109,7 @@ def send_welcome_email(to_email: str, name: str):
             </table>
             
             <div style="text-align: center; margin-top: 20px;">
-                <a href="https://decipher.com/pricing" style="display: inline-block; background: #f97316; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">View Pricing Plans</a>
+                <a href="https://decipherr.vercel.app/pricing" style="display: inline-block; background: #f97316; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">View Pricing Plans</a>
             </div>
         </div>
         

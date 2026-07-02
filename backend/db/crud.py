@@ -13,7 +13,7 @@ from sqlalchemy import desc, func
 
 from db.models import (
     User, Document, ChatMessage, Summary, Quiz,
-    FlashcardDeck, Note, Figure, generate_uuid, XPTransaction,
+    FlashcardDeck, Note, Figure, generate_uuid, XPTransaction, OTP,
 )
 
 
@@ -445,7 +445,6 @@ def migrate_guest_data(db: Session, guest_id: str, new_user_id: str):
 # ═══════════════════════════════════════════════════════════════════════
 
 def create_otp(db: Session, email: str, otp_code: str, expires_at: datetime):
-    from db.models import OTP
     # Delete existing OTPs for this email to prevent spam
     db.query(OTP).filter(OTP.email == email).delete()
     
@@ -456,7 +455,6 @@ def create_otp(db: Session, email: str, otp_code: str, expires_at: datetime):
     return otp
 
 def verify_otp(db: Session, email: str, otp_code: str) -> bool:
-    from db.models import OTP
     otp = db.query(OTP).filter(
         OTP.email == email, 
         OTP.otp_code == otp_code,
