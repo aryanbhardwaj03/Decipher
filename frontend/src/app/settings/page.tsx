@@ -1,39 +1,82 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+
+import { useEffect, useState, type ChangeEvent } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Settings,
+  User,
+  Paintbrush,
+  Brain,
+  FolderOpen,
+  Bell,
+  Shield,
+  CreditCard,
+  LogOut,
+  Check,
+} from "lucide-react";
+
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Settings, User, Paintbrush, Brain, FolderOpen, Bell, Shield, CreditCard, LogOut, Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useTheme } from "@/components/providers/ThemeProvider";
-
 import { showToast } from "@/components/ui/Toaster";
-
 import { useAuth } from "@/components/providers/AuthProvider";
-import { apiChangePassword, apiUploadAvatar, apiUpdateProfile, apiExportData, apiDeleteAllData, apiCreateOrder, apiCancelSubscription } from "@/lib/api";
+import {
+  apiChangePassword,
+  apiUploadAvatar,
+  apiUpdateProfile,
+  apiExportData,
+  apiDeleteAllData,
+  apiCancelSubscription,
+} from "@/lib/api";
 import { API_BASE } from "@/lib/constants";
 
-export default function SettingsPage() {
+interface SettingsPageProps {
+  searchParams?: { tab?: string };
+}
+
+export default function SettingsPage({ searchParams }: SettingsPageProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const initialTab = searchParams.get("tab") || "profile";
+  const initialTab = typeof searchParams?.tab === "string" ? searchParams.tab : "profile";
   const [activeTab, setActiveTab] = useState(initialTab);
   const { theme, setTheme } = useTheme();
   const { user, logout, refreshUser } = useAuth();
-  
+
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
   const [name, setName] = useState(user?.name || "");
   const [emailNotifications, setEmailNotifications] = useState(true);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   useEffect(() => {
     if (user?.name) {
       setName(user.name);
     }
   }, [user?.name]);
+
+  const tabs = [
+    { id: "profile", label: "Profile", icon: User },
+    { id: "appearance", label: "Appearance", icon: Paintbrush },
+    { id: "ai", label: "AI Preferences", icon: Brain },
+    { id: "documents", label: "Documents", icon: FolderOpen },
+    { id: "notifications", label: "Notifications", icon: Bell },
+    { id: "privacy", label: "Privacy", icon: Shield },
+    { id: "billing", label: "Billing", icon: CreditCard },
+  ];
+
+  const getInitials = (userName?: string, email?: string) => {
+    if (userName) {
+      const parts = userName.trim().split(" ");
+      if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
+      return userName.substring(0, 2).toUpperCase();
+    }
+    return email ? email[0].toUpperCase() : "U";
+  };
 
   const handleSaveProfile = async () => {
     try {
@@ -52,9 +95,11 @@ export default function SettingsPage() {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
-    input.onchange = async (e: any) => {
-      const file = e.target.files[0];
+    input.onchange = async (event: Event) => {
+      const target = event.target as HTMLInputElement | null;
+      const file = target?.files?.[0];
       if (!file) return;
+
       try {
         setIsLoading(true);
         await apiUploadAvatar(file);
@@ -74,10 +119,12 @@ export default function SettingsPage() {
       showToast("Please fill all password fields", "error");
       return;
     }
+
     if (newPassword !== confirmPassword) {
       showToast("New passwords do not match", "error");
       return;
     }
+
     try {
       setIsLoading(true);
       await apiChangePassword(oldPassword, newPassword);
@@ -110,16 +157,20 @@ export default function SettingsPage() {
   };
 
   const handleDeleteAccount = async () => {
-    if (confirm("Are you sure you want to permanently delete all your documents and data?")) {
-      try {
-        setIsLoading(true);
-        await apiDeleteAllData();
-        showToast("All data deleted successfully", "success");
-      } catch (err: any) {
-        showToast(err.message || "Failed to delete data", "error");
-      } finally {
-        setIsLoading(false);
-      }
+    const confirmed = window.confirm(
+      "Are you sure you want to permanently delete all your documents and data?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setIsLoading(true);
+      await apiDeleteAllData();
+      showToast("All data deleted successfully", "success");
+    } catch (err: any) {
+      showToast(err.message || "Failed to delete data", "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -128,47 +179,35 @@ export default function SettingsPage() {
   };
 
   const handleCancelSubscription = async () => {
-    if (confirm("Are you sure you want to cancel your subscription? You will be downgraded to the Free plan.")) {
-      try {
-        setIsLoading(true);
-        await apiCancelSubscription();
-        await refreshUser();
-        showToast("Subscription cancelled successfully", "success");
-      } catch (err: any) {
-        showToast(err.message || "Failed to cancel subscription", "error");
-      } finally {
-        setIsLoading(false);
-      }
+    const confirmed = window.confirm(
+      "Are you sure you want to cancel your subscription? You will be downgraded to the Free plan."
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setIsLoading(true);
+      await apiCancelSubscription();
+      await refreshUser();
+      showToast("Subscription cancelled successfully", "success");
+    } catch (err: any) {
+      showToast(err.message || "Failed to cancel subscription", "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleToggleEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmailNotifications(e.target.checked);
-    showToast(`Email notifications ${e.target.checked ? 'enabled' : 'disabled'}`, "success");
+  const handleToggleEmail = (event: ChangeEvent<HTMLInputElement>) => {
+    setEmailNotifications(event.target.checked);
+    showToast(
+      `Email notifications ${event.target.checked ? "enabled" : "disabled"}`,
+      "success"
+    );
   };
 
-  const handleThemeChange = (t: string) => {
-    setTheme(t as any);
+  const handleThemeChange = (nextTheme: string) => {
+    setTheme(nextTheme as any);
     showToast("Theme changed", "success");
-  };
-  
-  const tabs = [
-    { id: "profile", label: "Profile", icon: User },
-    { id: "appearance", label: "Appearance", icon: Paintbrush },
-    { id: "ai", label: "AI Preferences", icon: Brain },
-    { id: "documents", label: "Documents", icon: FolderOpen },
-    { id: "notifications", label: "Notifications", icon: Bell },
-    { id: "privacy", label: "Privacy", icon: Shield },
-    { id: "billing", label: "Billing", icon: CreditCard },
-  ];
-
-  const getInitials = (name?: string, email?: string) => {
-    if (name) {
-      const parts = name.trim().split(" ");
-      if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
-      return name.substring(0, 2).toUpperCase();
-    }
-    return email ? email[0].toUpperCase() : "U";
   };
 
   return (
@@ -183,30 +222,31 @@ export default function SettingsPage() {
             <p className="text-muted-foreground mt-1">Manage your account and preferences</p>
           </div>
         </div>
-        
+
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar */}
           <div className="w-full md:w-64 shrink-0 flex flex-col gap-1">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
+
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm text-left
-                    ${isActive 
-                      ? "bg-primary text-white shadow-md shadow-primary/20" 
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm text-left ${
+                    isActive
+                      ? "bg-primary text-white shadow-md shadow-primary/20"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                    }`}
+                  }`}
                 >
                   <Icon className="w-4 h-4" />
                   {tab.label}
                 </button>
               );
             })}
-            <div className="my-4 border-t border-border"></div>
-            <button 
+
+            <div className="my-4 border-t border-border" />
+            <button
               onClick={() => logout()}
               className="flex items-center w-full gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm text-left text-red-500 hover:bg-red-500/10"
             >
@@ -215,9 +255,7 @@ export default function SettingsPage() {
             </button>
           </div>
 
-          {/* Content Area */}
           <div className="flex-1 max-w-3xl">
-            
             {activeTab === "profile" && (
               <div className="space-y-6">
                 <Card>
@@ -229,27 +267,47 @@ export default function SettingsPage() {
                     <div className="flex items-center gap-6">
                       <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center border-4 border-background shadow-sm text-3xl font-bold text-muted-foreground overflow-hidden">
                         {user?.avatar_url ? (
-                          <img src={`${API_BASE}${user.avatar_url}`} alt="Avatar" className="w-full h-full object-cover" />
+                          <img
+                            src={`${API_BASE}${user.avatar_url}`}
+                            alt="Avatar"
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
                           getInitials(user?.name, user?.email)
                         )}
                       </div>
                       <div className="flex gap-2">
-                        <Button onClick={handleUploadAvatar} variant="outline" disabled={isLoading}>Upload Avatar</Button>
-                        <Button variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-500/10">Remove</Button>
+                        <Button onClick={handleUploadAvatar} variant="outline" disabled={isLoading}>
+                          Upload Avatar
+                        </Button>
+                        <Button variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-500/10">
+                          Remove
+                        </Button>
                       </div>
                     </div>
                     <div className="grid gap-4">
                       <div className="grid gap-2">
                         <label className="text-sm font-medium">Display Name</label>
-                        <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" />
+                        <input
+                          type="text"
+                          value={name}
+                          onChange={(event) => setName(event.target.value)}
+                          className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        />
                       </div>
                       <div className="grid gap-2">
                         <label className="text-sm font-medium">Email Address</label>
-                        <input type="email" readOnly className="flex h-10 w-full rounded-md border border-border bg-muted px-3 py-2 text-sm text-muted-foreground focus-visible:outline-none" value={user?.email || ""} />
+                        <input
+                          type="email"
+                          readOnly
+                          className="flex h-10 w-full rounded-md border border-border bg-muted px-3 py-2 text-sm text-muted-foreground focus-visible:outline-none"
+                          value={user?.email || ""}
+                        />
                       </div>
                     </div>
-                    <Button onClick={handleSaveProfile} disabled={isLoading}>Save Changes</Button>
+                    <Button onClick={handleSaveProfile} disabled={isLoading}>
+                      Save Changes
+                    </Button>
                   </CardContent>
                 </Card>
 
@@ -261,17 +319,37 @@ export default function SettingsPage() {
                   <CardContent className="space-y-4">
                     <div className="grid gap-2">
                       <label className="text-sm font-medium">Current Password</label>
-                      <input type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="••••••••" className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" />
+                      <input
+                        type="password"
+                        value={oldPassword}
+                        onChange={(event) => setOldPassword(event.target.value)}
+                        placeholder="••••••••"
+                        className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      />
                     </div>
                     <div className="grid gap-2">
                       <label className="text-sm font-medium">New Password</label>
-                      <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••••" className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" />
+                      <input
+                        type="password"
+                        value={newPassword}
+                        onChange={(event) => setNewPassword(event.target.value)}
+                        placeholder="••••••••"
+                        className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      />
                     </div>
                     <div className="grid gap-2">
                       <label className="text-sm font-medium">Confirm New Password</label>
-                      <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" />
+                      <input
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(event) => setConfirmPassword(event.target.value)}
+                        placeholder="••••••••"
+                        className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      />
                     </div>
-                    <Button onClick={handleChangePassword} variant="outline" disabled={isLoading}>Update Password</Button>
+                    <Button onClick={handleChangePassword} variant="outline" disabled={isLoading}>
+                      Update Password
+                    </Button>
                   </CardContent>
                 </Card>
               </div>
@@ -286,16 +364,32 @@ export default function SettingsPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      {["light", "dark", "system"].map((t) => (
-                        <div 
-                          key={t}
-                          onClick={() => handleThemeChange(t)}
-                          className={`cursor-pointer rounded-xl border-2 p-4 flex flex-col items-center gap-3 transition-all ${theme === t ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/50"}`}
+                      {["light", "dark", "system"].map((themeOption) => (
+                        <div
+                          key={themeOption}
+                          onClick={() => handleThemeChange(themeOption)}
+                          className={`cursor-pointer rounded-xl border-2 p-4 flex flex-col items-center gap-3 transition-all ${
+                            theme === themeOption
+                              ? "border-primary bg-primary/5"
+                              : "border-border hover:border-muted-foreground/50"
+                          }`}
                         >
-                          <div className={`w-full h-24 rounded-md border shadow-sm flex items-center justify-center ${t === "dark" ? "bg-slate-900 border-slate-800" : t === "light" ? "bg-slate-50 border-slate-200" : "bg-gradient-to-br from-slate-50 to-slate-900 border-slate-300"}`}>
-                            {theme === t && <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center"><Check className="w-5 h-5" /></div>}
+                          <div
+                            className={`w-full h-24 rounded-md border shadow-sm flex items-center justify-center ${
+                              themeOption === "dark"
+                                ? "bg-slate-900 border-slate-800"
+                                : themeOption === "light"
+                                  ? "bg-slate-50 border-slate-200"
+                                  : "bg-gradient-to-br from-slate-50 to-slate-900 border-slate-300"
+                            }`}
+                          >
+                            {theme === themeOption && (
+                              <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">
+                                <Check className="w-5 h-5" />
+                              </div>
+                            )}
                           </div>
-                          <span className="font-medium capitalize">{t}</span>
+                          <span className="font-medium capitalize">{themeOption}</span>
                         </div>
                       ))}
                     </div>
@@ -324,7 +418,6 @@ export default function SettingsPage() {
                   <div className="pt-4 border-t border-border">
                     <h3 className="text-sm font-semibold mb-4 text-primary">Feature-Specific Models</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      
                       <div className="grid gap-2">
                         <label className="text-xs font-medium text-muted-foreground">Chat Responses</label>
                         <select className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
@@ -396,7 +489,7 @@ export default function SettingsPage() {
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" className="sr-only peer" defaultChecked />
-                        <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                        <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
                       </label>
                     </div>
                   </div>
@@ -420,7 +513,7 @@ export default function SettingsPage() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" />
-                      <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                      <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
                     </label>
                   </div>
                   <div className="flex items-center justify-between py-2 border-b border-border">
@@ -430,7 +523,7 @@ export default function SettingsPage() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" defaultChecked />
-                      <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                      <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
                     </label>
                   </div>
                 </CardContent>
@@ -450,8 +543,14 @@ export default function SettingsPage() {
                       <p className="text-xs text-muted-foreground">Receive emails about new features and weekly reports.</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" checked={emailNotifications} onChange={handleToggleEmail} disabled={isLoading} />
-                      <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                      <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={emailNotifications}
+                        onChange={handleToggleEmail}
+                        disabled={isLoading}
+                      />
+                      <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
                     </label>
                   </div>
                   <div className="flex items-center justify-between">
@@ -461,7 +560,7 @@ export default function SettingsPage() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" />
-                      <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                      <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
                     </label>
                   </div>
                 </CardContent>
@@ -477,13 +576,21 @@ export default function SettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="grid gap-2 border p-4 rounded-lg">
                     <h4 className="font-medium text-sm">Export Data</h4>
-                    <p className="text-xs text-muted-foreground mb-2">Download a ZIP file containing all your documents, summaries, and chats.</p>
-                    <Button variant="outline" className="w-fit" onClick={handleExportData} disabled={isLoading}>Export All Data</Button>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Download a ZIP file containing all your documents, summaries, and chats.
+                    </p>
+                    <Button variant="outline" className="w-fit" onClick={handleExportData} disabled={isLoading}>
+                      Export All Data
+                    </Button>
                   </div>
                   <div className="grid gap-2 border p-4 rounded-lg border-red-500/20 bg-red-500/5">
                     <h4 className="font-medium text-sm text-red-500">Delete All Documents</h4>
-                    <p className="text-xs text-red-500/80 mb-2">This will permanently delete all your documents and generated data. This cannot be undone.</p>
-                    <Button variant="destructive" className="w-fit" onClick={handleDeleteAccount} disabled={isLoading}>Delete All Documents</Button>
+                    <p className="text-xs text-red-500/80 mb-2">
+                      This will permanently delete all your documents and generated data. This cannot be undone.
+                    </p>
+                    <Button variant="destructive" className="w-fit" onClick={handleDeleteAccount} disabled={isLoading}>
+                      Delete All Documents
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -501,32 +608,43 @@ export default function SettingsPage() {
                       <div className="p-6 rounded-xl border-2 border-primary bg-primary/5 flex justify-between items-center">
                         <div>
                           <h4 className="font-bold text-lg text-primary">Pro Plan</h4>
-                          <p className="text-sm text-muted-foreground">You are currently on the Pro tier. Enjoy unlimited access.</p>
+                          <p className="text-sm text-muted-foreground">
+                            You are currently on the Pro tier. Enjoy unlimited access.
+                          </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-2xl mb-1">Active<span className="text-sm font-normal text-muted-foreground"></span></p>
+                          <p className="font-bold text-2xl mb-1">
+                            Active<span className="text-sm font-normal text-muted-foreground" />
+                          </p>
                         </div>
                       </div>
-                      <Button className="w-full" variant="outline" onClick={handleCancelSubscription} disabled={isLoading}>Cancel Subscription</Button>
+                      <Button className="w-full" variant="outline" onClick={handleCancelSubscription} disabled={isLoading}>
+                        Cancel Subscription
+                      </Button>
                     </>
                   ) : (
                     <>
                       <div className="p-6 rounded-xl border-2 border-primary bg-primary/5 flex justify-between items-center">
                         <div>
                           <h4 className="font-bold text-lg text-primary">Free Plan</h4>
-                          <p className="text-sm text-muted-foreground">You are currently on the free tier (local models only).</p>
+                          <p className="text-sm text-muted-foreground">
+                            You are currently on the free tier (local models only).
+                          </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-2xl mb-1">₹0<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+                          <p className="font-bold text-2xl mb-1">
+                            ₹0<span className="text-sm font-normal text-muted-foreground">/mo</span>
+                          </p>
                         </div>
                       </div>
-                      <Button className="w-full" onClick={handleUpgradePro} disabled={isLoading}>Upgrade to Pro</Button>
+                      <Button className="w-full" onClick={handleUpgradePro} disabled={isLoading}>
+                        Upgrade to Pro
+                      </Button>
                     </>
                   )}
                 </CardContent>
               </Card>
             )}
-
           </div>
         </div>
       </main>
