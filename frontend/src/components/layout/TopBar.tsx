@@ -149,7 +149,7 @@ export function TopBar({ toggleSidebar, isSidebarOpen = true }: { toggleSidebar?
                   {/* Menu Items */}
                   <div className="py-1.5 px-2">
                     <Link 
-                      href="/settings" 
+                      href="/settings?tab=profile" 
                       onClick={() => setIsProfileOpen(false)}
                       className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-all duration-150 group"
                     >
@@ -157,12 +157,12 @@ export function TopBar({ toggleSidebar, isSidebarOpen = true }: { toggleSidebar?
                         <User className="w-4 h-4 group-hover:text-primary transition-colors" />
                       </div>
                       <div>
-                        <p className="leading-tight">Profile Details</p>
-                        <p className="text-[10px] text-muted-foreground/70 font-normal">Manage your account</p>
+                        <p className="leading-tight">Profile</p>
+                        <p className="text-[10px] text-muted-foreground/70 font-normal">Name, avatar & password</p>
                       </div>
                     </Link>
                     <Link 
-                      href="/settings" 
+                      href="/settings?tab=billing" 
                       onClick={() => setIsProfileOpen(false)}
                       className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-all duration-150 group"
                     >
@@ -170,8 +170,8 @@ export function TopBar({ toggleSidebar, isSidebarOpen = true }: { toggleSidebar?
                         <Settings className="w-4 h-4 group-hover:text-primary transition-colors" />
                       </div>
                       <div>
-                        <p className="leading-tight">Settings</p>
-                        <p className="text-[10px] text-muted-foreground/70 font-normal">Preferences & data</p>
+                        <p className="leading-tight">Billing & Plan</p>
+                        <p className="text-[10px] text-muted-foreground/70 font-normal">Manage subscription</p>
                       </div>
                     </Link>
                   </div>

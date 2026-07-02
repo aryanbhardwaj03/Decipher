@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Settings, User, Paintbrush, Brain, FolderOpen, Bell, Shield, CreditCard, LogOut, Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -15,7 +15,9 @@ import { API_BASE } from "@/lib/constants";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("profile");
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") || "profile";
+  const [activeTab, setActiveTab] = useState(initialTab);
   const { theme, setTheme } = useTheme();
   const { user, logout, refreshUser } = useAuth();
   
