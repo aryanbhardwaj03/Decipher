@@ -153,15 +153,15 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto px-8 py-10">
         
         <header className="mb-8">
-          <h1 className="text-3xl font-extrabold tracking-tight mb-2 flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2 flex flex-wrap items-center gap-3">
             {getGreeting()}, {user?.name || "User"}! 👋
             {!isGuest && (user?.plan === 'Plus' || user?.plan === 'Pro' || hasXpPlus) && (
-              <span className="text-[12px] px-2.5 py-1 rounded-md font-bold tracking-wide uppercase bg-orange-500/10 text-orange-500 border border-orange-500/20">
+              <span className="text-[11px] sm:text-[12px] px-2.5 py-1 rounded-md font-bold tracking-wide uppercase bg-orange-500/10 text-orange-500 border border-orange-500/20">
                 {user?.plan === 'Pro' ? 'Pro Subscriber' : (hasXpPlus && user?.plan !== 'Plus' ? 'Plus (XP Unlocked)' : 'Plus Subscriber')}
               </span>
             )}
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground mt-2 sm:mt-0">
             Let AI uncover the knowledge hidden in your documents.
           </p>
         </header>
@@ -172,7 +172,7 @@ export default function DashboardPage() {
           <div className="lg:col-span-2 space-y-8">
             
             {/* Upload Box */}
-            <div className="bg-card border border-border rounded-3xl p-8 relative overflow-hidden flex flex-col sm:flex-row gap-8 shadow-sm">
+            <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 relative overflow-hidden flex flex-col sm:flex-row gap-6 sm:gap-8 shadow-sm">
               <div className="flex-1 relative z-10">
                 <h2 className="text-2xl font-bold mb-3 text-foreground">Upload any document</h2>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-6 max-w-sm">

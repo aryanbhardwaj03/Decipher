@@ -106,17 +106,17 @@ export default function LibraryPage() {
       </AnimatePresence>
 
       <main className="max-w-7xl mx-auto px-6 py-10">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-primary/10 text-primary">
-              <FolderOpen className="w-7 h-7" />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 sm:gap-4 mb-8">
+          <div className="flex items-start sm:items-center gap-4">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-2xl flex items-center justify-center bg-primary/10 text-primary mt-1 sm:mt-0">
+              <FolderOpen className="w-6 h-6 sm:w-7 sm:h-7" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">My Library</h1>
-              <p className="text-muted-foreground mt-1">All your uploaded documents in one place</p>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-1">My Library</h1>
+              <p className="text-sm sm:text-base text-muted-foreground">All your uploaded documents in one place</p>
             </div>
           </div>
-          <Button variant="default" onClick={() => setShowUpload(true)}>Upload New</Button>
+          <Button variant="default" className="w-full sm:w-auto py-6 sm:py-2 text-base sm:text-sm" onClick={() => setShowUpload(true)}>Upload New</Button>
         </div>
 
         <div className="flex gap-4 mb-8">
