@@ -13,8 +13,11 @@ import {
   Sparkles,
   User,
   Cloud,
+  Menu,
+  X,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { AnimatePresence } from "framer-motion";
 
 import { NotificationCenter } from "./NotificationCenter";
 
@@ -22,6 +25,20 @@ export function Navbar() {
   const pathname = usePathname();
   const { user, isGuest, logout } = useAuth();
   const [showSignInHint, setShowSignInHint] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target as Node)) {
+        setShowMobileMenu(false);
+      }
+    };
+    if (showMobileMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showMobileMenu]);
 
   return (
     <motion.nav
@@ -111,13 +128,63 @@ export function Navbar() {
                 {/* Logout */}
                 <button
                   onClick={logout}
-                  className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                  className="hidden sm:block p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
                   title="Sign out"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                 </button>
               </div>
             )}
+
+            {/* Mobile Menu Toggle */}
+            <div className="flex md:hidden relative" ref={mobileMenuRef}>
+              <button 
+                onClick={() => setShowMobileMenu(!showMobileMenu)} 
+                className="p-1.5 ml-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+              >
+                {showMobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+
+              <AnimatePresence>
+                {showMobileMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-2 w-48 bg-card border border-border rounded-xl shadow-lg overflow-hidden flex flex-col py-1 z-50"
+                  >
+                    <Link 
+                      href="/dashboard" 
+                      onClick={() => setShowMobileMenu(false)}
+                      className={`px-4 py-2 text-xs font-medium ${pathname === "/dashboard" ? "text-primary bg-primary/[0.08]" : "text-muted-foreground hover:text-foreground hover:bg-muted"} flex items-center gap-2 transition-colors`}
+                    >
+                      <LayoutDashboard className="w-3.5 h-3.5" />
+                      Dashboard
+                    </Link>
+                    {user?.role === "admin" && (
+                      <Link 
+                        href="/admin" 
+                        onClick={() => setShowMobileMenu(false)}
+                        className={`px-4 py-2 text-xs font-medium ${pathname?.startsWith("/admin") ? "text-primary bg-primary/[0.08]" : "text-muted-foreground hover:text-foreground hover:bg-muted"} flex items-center gap-2 transition-colors`}
+                      >
+                        <Shield className="w-3.5 h-3.5" />
+                        Admin
+                      </Link>
+                    )}
+                    {!isGuest && (
+                      <button 
+                        onClick={() => { setShowMobileMenu(false); logout(); }}
+                        className="w-full text-left px-4 py-2 text-xs font-medium text-red-500 hover:bg-red-500/10 flex items-center gap-2 transition-colors mt-1 border-t border-border"
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                        Sign Out
+                      </button>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </div>

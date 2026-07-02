@@ -253,7 +253,7 @@ export default function ChatPage() {
       </div>
 
       {/* Floating Input Area (Claude-style) */}
-      <div className="shrink-0 p-4 md:p-6 bg-gradient-to-t from-background via-background to-transparent z-20">
+      <div className="shrink-0 p-3 sm:p-4 md:p-6 bg-gradient-to-t from-background via-background to-transparent z-20">
         <div className="max-w-3xl mx-auto relative">
           <div className="relative flex items-end shadow-lg shadow-black/5 dark:shadow-black/20 rounded-2xl bg-card border border-border overflow-hidden focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10 transition-all">
             <textarea 
@@ -269,13 +269,13 @@ export default function ChatPage() {
               disabled={streaming}
               rows={1}
               style={{ minHeight: '56px', maxHeight: '200px' }}
-              className="flex-1 px-5 py-4 bg-transparent text-[15px] text-foreground resize-none focus:outline-none disabled:opacity-50 placeholder:text-muted-foreground leading-relaxed" 
+              className="flex-1 px-4 sm:px-5 py-4 bg-transparent text-[14px] sm:text-[15px] text-foreground resize-none focus:outline-none disabled:opacity-50 placeholder:text-muted-foreground leading-relaxed" 
             />
-            <div className="p-2 shrink-0 h-[56px] flex items-center justify-center">
+            <div className="p-1.5 sm:p-2 shrink-0 h-[56px] flex items-center justify-center">
               <button 
                 onClick={handleSend} 
                 disabled={!input.trim() || streaming}
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-primary-foreground bg-primary hover:opacity-90 disabled:bg-muted disabled:text-muted-foreground transition-all"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-primary-foreground bg-primary hover:opacity-90 disabled:bg-muted disabled:text-muted-foreground transition-all"
               >
                 <Send className="w-4 h-4 ml-0.5" />
               </button>

@@ -63,19 +63,23 @@ export default function SummaryPage({ params }: { params: Promise<{ id: string }
 
         <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-5">
           {/* Sidebar */}
-          <div className="space-y-1.5">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2.5">Type</p>
-            {SUMMARY_TYPES.map((type) => (
-              <button key={type.id} onClick={() => handleGenerate(type.id)} disabled={generating}
-                className={cn("w-full text-left px-3.5 py-2.5 rounded-xl border text-sm transition-all",
-                  activeType === type.id ? "border-primary/30 bg-primary/[0.06]"
-                    : "border-border bg-card hover:border-primary/20")}>
-                <span className="mr-2 text-lg">{type.icon}</span>
-                <span className="font-medium text-sm">{type.label}</span>
-                <span className="block text-xs text-muted-foreground mt-1 ml-7">{type.description}</span>
-              </button>
-            ))}
-            <div className="pt-3">
+          <div className="flex flex-col lg:space-y-1.5">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2.5 shrink-0">Type</p>
+            <div className="flex lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
+              {SUMMARY_TYPES.map((type) => (
+                <button key={type.id} onClick={() => handleGenerate(type.id)} disabled={generating}
+                  className={cn("shrink-0 w-[220px] lg:w-full text-left px-3.5 py-2.5 rounded-xl border text-sm transition-all",
+                    activeType === type.id ? "border-primary/30 bg-primary/[0.06]"
+                      : "border-border bg-card hover:border-primary/20")}>
+                  <div className="flex items-center">
+                    <span className="mr-2 text-lg">{type.icon}</span>
+                    <span className="font-medium text-sm">{type.label}</span>
+                  </div>
+                  <span className="block text-xs text-muted-foreground mt-1.5 lg:ml-7 whitespace-normal">{type.description}</span>
+                </button>
+              ))}
+            </div>
+            <div className="pt-3 shrink-0">
               <p className="text-[10px] font-semibold text-muted-foreground mb-1.5">Custom Focus</p>
               <input type="text" value={customFocus} onChange={(e) => setCustomFocus(e.target.value)}
                 placeholder="e.g., results section…"

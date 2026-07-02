@@ -138,16 +138,16 @@ export default function DocumentPage({ params }: { params: Promise<{ id: string 
 
         {/* Document header */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-          className="p-5 rounded-2xl bg-card border border-border mb-8 relative">
-          <div className="flex items-start justify-between gap-4">
+          className="p-4 sm:p-5 rounded-2xl bg-card border border-border mb-8 relative">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="flex items-start gap-3.5 flex-1 min-w-0">
-              <span className="text-3xl">{getFileIcon(doc.file_type)}</span>
+              <span className="text-3xl shrink-0">{getFileIcon(doc.file_type)}</span>
               <div className="flex-1 min-w-0">
-                <h1 className="text-xl font-bold tracking-tight truncate mb-0.5 pr-2">{doc.original_filename}</h1>
-                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-1">
+                <h1 className="text-lg sm:text-xl font-bold tracking-tight truncate mb-0.5 pr-2">{doc.original_filename}</h1>
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-muted-foreground mt-1">
                   <span>{formatFileSize(doc.file_size)}</span>
                   <span>·</span>
-                  <span>Uploaded {new Date(doc.created_at).toLocaleDateString()}</span>
+                  <span>{new Date(doc.created_at).toLocaleDateString()}</span>
                   {doc.estimated_difficulty && (
                     <>
                       <span>·</span>
@@ -162,7 +162,7 @@ export default function DocumentPage({ params }: { params: Promise<{ id: string 
             
             <button 
               onClick={() => setViewerOpen(true)}
-              className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg transition-colors shadow-sm"
+              className="shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 sm:py-1.5 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg transition-colors shadow-sm w-full sm:w-auto"
             >
               <FileText className="w-3.5 h-3.5" /> 
               View Original
@@ -170,7 +170,7 @@ export default function DocumentPage({ params }: { params: Promise<{ id: string 
           </div>
 
           {/* Stats strip */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 pt-4 border-t border-border">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-5 pt-4 border-t border-border">
             <StatItem icon={<FileType className="w-3.5 h-3.5" />} label="Pages" value={doc.pages} />
             <StatItem icon={<BarChart3 className="w-3.5 h-3.5" />} label="Words" value={doc.word_count.toLocaleString()} />
             <StatItem icon={<Clock className="w-3.5 h-3.5" />} label="Read" value={`${doc.reading_time_minutes} min`} />

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Sparkles, Grid, UploadCloud, FileText, MessageSquare, CheckSquare, Database, Share2 } from "lucide-react";
+import { Sparkles, Grid, UploadCloud, FileText, MessageSquare, CheckSquare, Database, Share2, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { UploadZone } from "@/components/document/UploadZone";
@@ -12,6 +12,7 @@ export default function OnboardingPage() {
   const router = useRouter();
   const [showToolsDropdown, setShowToolsDropdown] = useState(false);
   const [showGridDropdown, setShowGridDropdown] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const ALL_TOOLS = [
     { name: "AI Summarizer", icon: <FileText className="w-4 h-4" />, href: "/tool/summary" },
@@ -47,13 +48,13 @@ export default function OnboardingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Navbar */}
-      <header className="flex h-[72px] items-center justify-between bg-background px-6 shadow-sm border-b border-border">
+      <header className="relative z-50 flex h-[72px] items-center justify-between bg-background px-4 sm:px-6 shadow-sm border-b border-border">
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 shrink-0">
             <img src="/logo-mark.png" alt="Decipher Logo" className="h-8 w-8 object-contain" />
-            <span className="text-[22px] font-bold tracking-tight">Decipher</span>
+            <span className="text-[20px] sm:text-[22px] font-bold tracking-tight">Decipher</span>
           </Link>
           
           <nav className="hidden lg:flex items-center gap-6 text-[13px] font-bold uppercase tracking-wide text-foreground">
@@ -97,7 +98,8 @@ export default function OnboardingPage() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-4">
+        {/* Desktop Actions */}
+        <div className="hidden md:flex items-center gap-4">
           <ThemeToggle />
           <Link href="/login" className="text-sm font-semibold hover:text-primary transition-colors">Login</Link>
           <Link href="/login?mode=signup" className="rounded-md bg-primary px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90">
@@ -106,9 +108,9 @@ export default function OnboardingPage() {
           <div className="relative" onMouseLeave={() => setShowGridDropdown(false)}>
             <button 
               onMouseEnter={() => setShowGridDropdown(true)}
-              className="ml-2 rounded hover:bg-muted p-1"
+              className="ml-2 rounded-lg hover:bg-muted p-1.5 transition-colors"
             >
-              <Grid className="h-6 w-6 text-muted-foreground" />
+              <Grid className="h-5 w-5 text-muted-foreground hover:text-foreground" />
             </button>
             <AnimatePresence>
               {showGridDropdown && (
@@ -130,19 +132,69 @@ export default function OnboardingPage() {
             </AnimatePresence>
           </div>
         </div>
+
+        {/* Mobile Toggle */}
+        <div className="flex md:hidden items-center gap-1">
+          <ThemeToggle />
+          <button 
+            onClick={() => setShowMobileMenu(!showMobileMenu)} 
+            className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+          >
+            {showMobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </header>
 
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {showMobileMenu && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden border-b border-border bg-background overflow-hidden relative z-40"
+          >
+            <div className="px-4 py-6 flex flex-col gap-6">
+              <div className="flex flex-col gap-3">
+                <Link onClick={() => setShowMobileMenu(false)} href="/login" className="w-full text-center py-2.5 text-sm font-semibold rounded-lg border border-border hover:bg-muted transition-colors">
+                  Login
+                </Link>
+                <Link onClick={() => setShowMobileMenu(false)} href="/login?mode=signup" className="w-full text-center py-2.5 rounded-lg bg-primary text-sm font-bold text-white transition hover:opacity-90">
+                  Sign up
+                </Link>
+              </div>
+              
+              <div className="pt-4 border-t border-border">
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">Tools</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {ALL_TOOLS.map(tool => (
+                    <Link 
+                      onClick={() => setShowMobileMenu(false)} 
+                      key={tool.href} 
+                      href={tool.href} 
+                      className="flex items-center gap-2 p-3 rounded-xl border border-border bg-card hover:border-primary/50 transition-colors text-sm font-medium"
+                    >
+                      {tool.icon} <span className="truncate">{tool.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Main Content */}
-      <main className="flex flex-col items-center justify-center px-4 pt-[100px] pb-[120px]">
-        <h1 className="text-center text-[44px] font-bold tracking-tight sm:text-[56px] text-foreground">
+      <main className="flex-1 flex flex-col items-center justify-center px-4 pt-16 sm:pt-[100px] pb-24 sm:pb-[120px]">
+        <h1 className="text-center text-4xl sm:text-[44px] md:text-[56px] font-bold tracking-tight text-foreground leading-[1.1]">
           AI Summarizer
         </h1>
         
-        <p className="mt-4 max-w-[600px] text-center text-[22px] text-muted-foreground font-light">
+        <p className="mt-4 max-w-[600px] text-center text-lg sm:text-[22px] text-muted-foreground font-light leading-snug px-2">
           Summarize PDF reports, essays, and study guides with AI
         </p>
 
-        <div className="mt-12 w-full max-w-[800px]">
+        <div className="mt-8 sm:mt-12 w-full max-w-[800px]">
            <div className="bg-transparent">
              <UploadZone 
                 onUploadComplete={() => router.push("/dashboard")} 
@@ -153,8 +205,8 @@ export default function OnboardingPage() {
       </main>
       
       {/* Footer */}
-      <footer className="fixed bottom-0 w-full border-t border-border bg-background p-4 text-xs text-muted-foreground">
-        <div className="flex justify-between px-2">
+      <footer className="shrink-0 border-t border-border bg-background p-4 text-xs text-muted-foreground">
+        <div className="max-w-7xl mx-auto flex justify-center sm:justify-between px-2">
           <span>© Decipher 2026 ® - Decipher your Document</span>
         </div>
       </footer>

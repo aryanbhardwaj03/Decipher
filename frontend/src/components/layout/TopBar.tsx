@@ -39,8 +39,8 @@ export function TopBar({ toggleSidebar, isSidebarOpen = true }: { toggleSidebar?
   }, [isProfileOpen]);
 
   return (
-    <header className="h-[72px] px-8 flex items-center justify-between sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border transition-all duration-300">
-      <div className="flex items-center gap-4">
+    <header className="h-[72px] px-4 sm:px-8 flex items-center justify-between sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border transition-all duration-300">
+      <div className="flex items-center gap-2 sm:gap-4">
         {toggleSidebar && !isSidebarOpen && (
           <button 
             onClick={toggleSidebar}
@@ -50,11 +50,13 @@ export function TopBar({ toggleSidebar, isSidebarOpen = true }: { toggleSidebar?
             <PanelLeft className="w-5 h-5" />
           </button>
         )}
-        <GlobalSearch />
+        <div className="hidden xs:block sm:block">
+          <GlobalSearch />
+        </div>
       </div>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         
         {/* Document Selector - Hidden on very small screens, visible on md+ */}
         <div className="hidden md:block">
