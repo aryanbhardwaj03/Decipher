@@ -1,6 +1,8 @@
 import { showToast } from "@/components/ui/Toaster";
 import { API_BASE } from "./constants";
 
+const API_FALLBACK_BASE = "https://ab12361-decipher-backend.hf.space";
+
 /** Get stored auth token */
 function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -51,6 +53,7 @@ async function apiFetch(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<Response> {
+  const primaryBase: string = API_BASE;
   const isFormData = options.body instanceof FormData;
   const headers: HeadersInit = {
     ...getSessionHeaders(!isFormData),
@@ -58,7 +61,7 @@ async function apiFetch(
   };
 
   try {
-    const response = await fetch(`${API_BASE}${endpoint}`, {
+    const response = await fetch(`${primaryBase}${endpoint}`, {
       cache: "no-store",
       ...options,
       headers,
@@ -77,8 +80,22 @@ async function apiFetch(
     return response;
   } catch (error: any) {
     if (error.name === "TypeError" && error.message === "Failed to fetch") {
-      // This is a network or CORS error. Show the URL to help debug.
-      showToast(`Network/CORS error connecting to ${API_BASE || "relative URL"}`, "error");
+      if (primaryBase !== API_FALLBACK_BASE) {
+        try {
+          const fallbackResponse = await fetch(`${API_FALLBACK_BASE}${endpoint}`, {
+            cache: "no-store",
+            ...options,
+            headers,
+          });
+
+          return fallbackResponse;
+        } catch {
+          // Fall through to the user-facing error below.
+        }
+      }
+
+      // This is a network or CORS error. Show the primary URL to help debug.
+      showToast(`Network/CORS error connecting to ${primaryBase || "relative URL"}`, "error");
     }
     throw error;
   }
