@@ -66,7 +66,7 @@ export default function SettingsPage({ searchParams }: SettingsPageProps) {
     { id: "documents", label: "Documents", icon: FolderOpen },
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "privacy", label: "Privacy", icon: Shield },
-    { id: "billing", label: "Billing", icon: CreditCard },
+    { id: "billing", label: "Subscription", icon: CreditCard },
   ];
 
   const getInitials = (userName?: string, email?: string) => {
@@ -599,7 +599,7 @@ export default function SettingsPage({ searchParams }: SettingsPageProps) {
             {activeTab === "billing" && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Billing & Subscription</CardTitle>
+                  <CardTitle>Subscription</CardTitle>
                   <CardDescription>Manage your subscription plan and billing history.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
