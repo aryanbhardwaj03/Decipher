@@ -71,7 +71,7 @@ async def lifespan(app: FastAPI):
                 logger.info("Detected stale embeddings, starting auto re-embed...")
                 all_chunks = db.query(DocumentChunk).all()
                 
-                batch_size = 32
+                batch_size = 10  # Small batches to avoid rate limits
                 for i in range(0, len(all_chunks), batch_size):
                     batch = all_chunks[i:i + batch_size]
                     texts = [c.text for c in batch]
@@ -80,9 +80,11 @@ async def lifespan(app: FastAPI):
                         for j, chunk in enumerate(batch):
                             chunk.embedding = new_embeddings[j].tolist()
                         db.commit()
+                        logger.info(f"Re-embedded batch {i//batch_size + 1}/{(len(all_chunks) + batch_size - 1)//batch_size}")
                     except Exception as e:
                         db.rollback()
                         logger.error(f"Re-embed batch {i} failed: {e}")
+                    time.sleep(3)  # Rate limit protection
                 
                 logger.info(f"Auto re-embed complete: {len(all_chunks)} chunks updated.")
             finally:

@@ -31,18 +31,29 @@ class GeminiREST:
         payload = {"requests": requests}
         
         try:
-            with httpx.Client(timeout=30.0) as client:
-                response = client.post(url, json=payload)
-                response.raise_for_status()
-                data = response.json()
-                
-                embeddings = []
-                for emb in data.get("embeddings", []):
-                    embeddings.append(emb.get("values", []))
-                
-                if not embeddings and content:
-                     return {"embedding": [[0.0] * 768 for _ in content]}
-                return {"embedding": embeddings}
+            import time as _time
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    with httpx.Client(timeout=30.0) as client:
+                        response = client.post(url, json=payload)
+                        response.raise_for_status()
+                        data = response.json()
+                        
+                        embeddings = []
+                        for emb in data.get("embeddings", []):
+                            embeddings.append(emb.get("values", []))
+                        
+                        if not embeddings and content:
+                             return {"embedding": [[0.0] * (output_dimensionality or 768) for _ in content]}
+                        return {"embedding": embeddings}
+                except httpx.HTTPStatusError as e:
+                    if e.response.status_code == 429 and attempt < max_retries - 1:
+                        wait = 2 ** (attempt + 1)  # 2s, 4s
+                        logger.warning(f"Rate limited, retrying in {wait}s...")
+                        _time.sleep(wait)
+                        continue
+                    raise
         except Exception as e:
             logger.error(f"Gemini REST embedding failed: {e}")
             raise e
