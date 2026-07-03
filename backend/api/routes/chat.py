@@ -173,14 +173,26 @@ async def _generate_rag_stream(
         from db.database import SessionLocal
         save_db = SessionLocal()
         try:
-            crud.create_chat_message(
-                db=save_db,
-                document_id=doc_id,
-                user_id=user_id,
-                role="assistant",
-                content=full_response,
-                sources=sources,
-            )
+            try:
+                crud.create_chat_message(
+                    db=save_db,
+                    document_id=doc_id,
+                    user_id=user_id,
+                    role="assistant",
+                    content=full_response,
+                    sources=sources,
+                )
+            except Exception as db_err:
+                logger.error(f"Failed to save with sources: {db_err}")
+                save_db.rollback()
+                crud.create_chat_message(
+                    db=save_db,
+                    document_id=doc_id,
+                    user_id=user_id,
+                    role="assistant",
+                    content=full_response,
+                    sources=None,
+                )
         finally:
             save_db.close()
 
