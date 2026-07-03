@@ -178,6 +178,19 @@ export default function ChatPage() {
             }
             return updated;
           });
+        } else if (event.type === "error") {
+          setMessages((prev) => {
+            const updated = [...prev];
+            if (updated[updated.length - 1]?.role !== "assistant") {
+              updated.push({ role: "assistant", content: event.content || "An error occurred.", sources: [] });
+            } else {
+              updated[updated.length - 1] = {
+                ...updated[updated.length - 1],
+                content: updated[updated.length - 1].content + "\n\n**Error**: " + (event.content || "Failed to generate response."),
+              };
+            }
+            return updated;
+          });
         }
       }
     } catch {

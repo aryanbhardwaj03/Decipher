@@ -217,10 +217,13 @@ def get_chat_history(
             ChatMessage.document_id == document_id,
             ChatMessage.user_id == user_id,
         )
-        .order_by(ChatMessage.created_at)
+        .order_by(desc(ChatMessage.created_at))
         .limit(limit)
         .all()
     )
+    # Return in chronological order
+    messages.reverse()
+    return messages
 
 
 # ═══════════════════════════════════════════════════════════════════════

@@ -13,12 +13,14 @@ import {
   CreditCard,
   LogOut,
   Check,
+  Type,
 } from "lucide-react";
 
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import { useFontSize, type FontSize } from "@/components/providers/FontSizeProvider";
 import { showToast } from "@/components/ui/Toaster";
 import { useAuth } from "@/components/providers/AuthProvider";
 import {
@@ -40,6 +42,7 @@ export default function SettingsPage({ searchParams }: SettingsPageProps) {
   const initialTab = typeof searchParams?.tab === "string" ? searchParams.tab : "profile";
   const [activeTab, setActiveTab] = useState(initialTab);
   const { theme, setTheme } = useTheme();
+  const { fontSize, setFontSize } = useFontSize();
   const { user, logout, refreshUser } = useAuth();
 
   const [oldPassword, setOldPassword] = useState("");
@@ -390,6 +393,37 @@ export default function SettingsPage({ searchParams }: SettingsPageProps) {
                             )}
                           </div>
                           <span className="font-medium capitalize">{themeOption}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Type className="w-5 h-5 text-primary" />
+                      Interface Scale
+                    </CardTitle>
+                    <CardDescription>Adjust the global font size of the application.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-4">
+                      {(["small", "medium", "large"] as FontSize[]).map((sizeOption) => (
+                        <div
+                          key={sizeOption}
+                          onClick={() => setFontSize(sizeOption)}
+                          className={`flex flex-col items-center justify-center p-4 border rounded-xl cursor-pointer transition-all ${
+                            fontSize === sizeOption
+                              ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                              : "border-border hover:border-primary/50 hover:bg-muted/50"
+                          }`}
+                        >
+                          <span className={`font-medium capitalize ${
+                            sizeOption === "small" ? "text-sm" : sizeOption === "large" ? "text-lg" : "text-base"
+                          }`}>
+                            {sizeOption === "medium" ? "Default" : sizeOption}
+                          </span>
                         </div>
                       ))}
                     </div>

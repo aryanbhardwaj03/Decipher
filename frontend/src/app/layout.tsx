@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { FontSizeProvider } from "@/components/providers/FontSizeProvider";
 import { Toaster } from "@/components/ui/Toaster";
 import { ErrorBoundary } from "@/components/providers/ErrorBoundary";
 
@@ -35,18 +36,20 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`} suppressHydrationWarning>
         <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "missing_client_id"}>
           <ThemeProvider>
-            <AuthProvider>
-              <NotificationProvider>
-                <NextTopLoader color="#f97316" showSpinner={false} />
-                <ErrorBoundary>
-                  {children}
-                </ErrorBoundary>
-                <Analytics />
-                <Toaster />
-                <GuestPrompt />
-                <CookieConsent />
-              </NotificationProvider>
-            </AuthProvider>
+            <FontSizeProvider>
+              <AuthProvider>
+                <NotificationProvider>
+                  <NextTopLoader color="#f97316" showSpinner={false} />
+                  <ErrorBoundary>
+                    {children}
+                  </ErrorBoundary>
+                  <Analytics />
+                  <Toaster />
+                  <GuestPrompt />
+                  <CookieConsent />
+                </NotificationProvider>
+              </AuthProvider>
+            </FontSizeProvider>
           </ThemeProvider>
         </GoogleOAuthProvider>
       </body>
