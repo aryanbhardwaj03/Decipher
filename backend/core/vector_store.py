@@ -105,9 +105,13 @@ class PgVectorStore:
                 .order_by("distance").limit(top_k)
             rows = db.execute(stmt).all()
             
+            import math
             results = []
             for chunk, dist in rows:
-                score = 1 - float(dist)
+                dist_f = float(dist) if dist is not None else 1.0
+                if math.isnan(dist_f) or math.isinf(dist_f):
+                    dist_f = 1.0
+                score = 1 - dist_f
                 if score < settings.SIMILARITY_THRESHOLD:
                     continue
                 results.append({"text": chunk.text, "metadata": chunk.metadata_json, "score": score})

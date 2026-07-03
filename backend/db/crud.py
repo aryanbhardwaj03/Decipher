@@ -186,6 +186,23 @@ def get_all_documents(db: Session, skip: int = 0, limit: int = 50) -> list[Docum
 #  CHAT MESSAGES
 # ═══════════════════════════════════════════════════════════════════════
 
+def _sanitize_sources(sources: list | None) -> list | None:
+    """Sanitize sources to remove NaN/Inf values that PostgreSQL JSON rejects."""
+    if not sources:
+        return sources
+    import math
+    sanitized = []
+    for src in sources:
+        clean = {}
+        for k, v in src.items():
+            if isinstance(v, float):
+                if math.isnan(v) or math.isinf(v):
+                    v = 0.0
+            clean[k] = v
+        sanitized.append(clean)
+    return sanitized
+
+
 def create_chat_message(
     db: Session,
     document_id: str,
@@ -200,7 +217,7 @@ def create_chat_message(
         user_id=user_id,
         role=role,
         content=content,
-        sources=sources,
+        sources=_sanitize_sources(sources),
     )
     db.add(msg)
     db.commit()
