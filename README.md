@@ -1,142 +1,368 @@
 <div align="center">
-  <img src="./assets/hero.png" alt="Decipher Logo" width="600" />
-  
-  <h3 align="center">Your Intelligent Study Companion</h3>
 
-  <p align="center">
-    Transform how you interact with your documents. Instantly unlock interactive chats, automated summaries, quizzes, and flashcards.
-    <br />
-    <a href="https://github.com/aryanbhardwaj03/Decipher"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="#">View Demo</a>
-    ·
-    <a href="https://github.com/aryanbhardwaj03/Decipher/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/aryanbhardwaj03/Decipher/issues">Request Feature</a>
-  </p>
+# 🧠 Decipher
+### AI-Powered Document Intelligence Platform
+
+Transform PDFs, DOCX, PPT, TXT, and other documents into interactive learning experiences using **Large Language Models (LLMs)** and **Retrieval-Augmented Generation (RAG)**.
+
+<p align="center">
+  <img src="./assets/dashboard.png" alt="Decipher Dashboard" width="900"/>
+</p>
+
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker)](https://www.docker.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+🌐 **Live Demo:** https://decipherr.vercel.app
+
 </div>
 
 ---
 
-## 🚀 About Decipher
+# 📖 About
 
-**Decipher** is not just another PDF viewer—it's a comprehensive AI study assistant designed to help students, researchers, and professionals extract knowledge from their documents faster than ever before.
+**Decipher** is an AI-powered study companion that helps students, researchers, and professionals understand documents faster.
 
-By combining cutting-edge Large Language Models (LLMs) with Vector Search (RAG), Decipher allows you to converse directly with your notes, auto-generate study materials, and build a personalized knowledge base.
+Instead of reading hundreds of pages manually, users can upload documents and instantly:
 
-![Decipher Dashboard](./assets/dashboard.png)
+- 💬 Chat with documents
+- 📝 Generate AI summaries
+- 🧠 Create flashcards
+- ❓Generate quizzes
+- 📚 Produce study notes
+- 🔍 Extract key insights
 
-### 🌟 Why Decipher?
-
-- **Conversational Document Chat**: Chat directly with your documents. Ask questions and get answers with precise, clickable page citations.
-- **Smart Summarization**: Generate instant, comprehensive summaries of lengthy study materials.
-- **Auto-Generated Quizzes**: Test your knowledge with AI-generated multiple-choice questions based directly on your document's content.
-- **Interactive Flashcards**: Quickly review key concepts with auto-generated flashcards.
-- **Seamless Onboarding**: Simple, secure sign-in with Google OAuth.
-
-![Decipher Navigation & Tools](./assets/navigation.png)
+Built using **LLMs**, **Vector Search**, and **Retrieval-Augmented Generation (RAG)**, Decipher delivers context-aware responses grounded in the uploaded documents.
 
 ---
 
-## 📸 Sneak Peek
+# ✨ Features
 
-### The AI Summarizer
-No more reading 100-page documents to find the main idea. Upload your file, and let Decipher distill it for you.
-![AI Summarizer](./assets/summarizer.png)
+## 📄 AI Document Summarizer
 
-### Secure Login
-Your documents are securely stored and tied to your account across all your devices.
-<div align="center">
-  <img src="./assets/login.png" alt="Secure Login" width="500" />
-</div>
+Upload your study material and receive concise AI-generated summaries within seconds.
+
+<p align="center">
+<img src="./assets/summarizer.png" width="900">
+</p>
 
 ---
 
-## 🏗️ Architecture
+## 💬 Intelligent Document Chat
 
-Decipher is built using a modern, scalable tech stack:
+Ask natural language questions and receive context-aware answers directly from your uploaded documents.
 
-### Frontend
-- **Framework**: [Next.js](https://nextjs.org/) (React 19)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
-- **State & UI**: Framer Motion, Lucide Icons, Custom UI Components
-- **Authentication**: Google OAuth
-
-### Backend
-- **Framework**: [FastAPI](https://fastapi.tiangolo.com/) (Python)
-- **Database**: PostgreSQL with [pgvector](https://github.com/pgvector/pgvector) for vector search via SQLAlchemy
-- **AI / LLMs**: 
-  - **Text Generation**: [Groq](https://groq.com/) (Llama-3.1-8b-instant) for ultra-fast, high-quality responses.
-  - **Embeddings**: [Google Gemini](https://ai.google.dev/) (`gemini-embedding-001`) for 768-dimensional document vectorization.
-- **Document Processing**: PyMuPDF, OCR integrations for text extraction.
+- Context-aware responses
+- Source-grounded answers
+- Fast inference using Groq API
+- RAG-powered retrieval
 
 ---
 
-## 💻 Getting Started
+## 📚 Study Tools
 
-### Prerequisites
-- Node.js (v18+)
-- Python 3.10+
-- PostgreSQL database with the `pgvector` extension installed
-- API Keys for Groq and Google Gemini
+Generate learning resources automatically:
 
-### Backend Setup
-
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-2. Create and activate a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Configure your environment variables in `.env`:
-   ```env
-   DATABASE_URL=postgresql://user:password@localhost:5432/decipher
-   GEMINI_API_KEY=your_gemini_key
-   GROQ_API_KEY=your_groq_key
-   LLM_PROVIDER=groq
-   ```
-5. Run the FastAPI server:
-   ```bash
-   uvicorn main:app --reload --port 8000
-   ```
-
-### Frontend Setup
-
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Configure your environment variables in `.env.local`:
-   ```env
-   NEXT_PUBLIC_API_URL=http://localhost:8000
-   NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_oauth_client_id
-   ```
-4. Start the development server:
-   ```bash
-   npm run dev
-   ```
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+- 📝 AI Notes
+- 🧠 Flashcards
+- ❓Quizzes
+- 📊 Key Insights
+- 📄 Smart Summaries
 
 ---
 
-## 🌐 Deployment
+## 🧭 Clean & Modern Navigation
 
-Decipher is designed to be easily deployed:
-- **Frontend**: Optimized for deployment on [Vercel](https://vercel.com).
-- **Backend**: Can be hosted on [Hugging Face Spaces](https://huggingface.co/spaces) (using Docker) or platforms like Render and Railway.
+Everything is organized into intuitive study tools.
 
-## 📄 License
+<p align="center">
+<img src="./assets/navigation.png" width="900">
+</p>
 
-This project is licensed under the MIT License.
+---
+
+## 🔐 Secure Authentication
+
+Users can securely create an account or continue with Google Authentication.
+
+<p align="center">
+<img src="./assets/login.png" width="550">
+</p>
+
+Features:
+
+- Google OAuth
+- Secure Sessions
+- Cross-device Sync
+
+---
+
+# 🖥 Dashboard
+
+A modern workspace where users upload documents, manage files, and access AI tools.
+
+<p align="center">
+<img src="./assets/dashboard.png" width="900">
+</p>
+
+Dashboard Features
+
+- Upload PDFs, DOCX, PPTX & TXT
+- AI Chat
+- Flashcards
+- Summaries
+- Notes
+- Quizzes
+- Search Documents
+- Recent Activity
+- Progress Tracking
+
+---
+
+# 🏗 Tech Stack
+
+## Frontend
+
+- Next.js 15
+- React
+- TypeScript
+- Tailwind CSS
+- Framer Motion
+- Lucide Icons
+
+---
+
+## Backend
+
+- FastAPI
+- Python
+- SQLAlchemy
+- PostgreSQL
+- pgvector
+
+---
+
+## AI Stack
+
+- Groq API
+- Llama 3.1 Instant
+- Google Gemini Embeddings
+- Retrieval-Augmented Generation (RAG)
+- Vector Embeddings
+
+---
+
+## Authentication
+
+- Google OAuth
+
+---
+
+## Payments
+
+- Razorpay
+
+Premium subscription support with secure payment processing.
+
+---
+
+## DevOps
+
+- Docker
+- Vercel
+- GitHub
+
+---
+
+# ⚙ Architecture
+
+```
+                User
+                  │
+                  ▼
+         Next.js Frontend
+                  │
+                  ▼
+          FastAPI Backend
+                  │
+     ┌────────────┼────────────┐
+     ▼            ▼            ▼
+ PostgreSQL   Groq API   Gemini Embeddings
+     │
+     ▼
+ pgvector Database
+     │
+     ▼
+ Retrieval-Augmented Generation
+     │
+     ▼
+ AI Responses
+```
+
+---
+
+# 🚀 Installation
+
+## Clone Repository
+
+```bash
+git clone https://github.com/aryanbhardwaj03/Decipher.git
+
+cd Decipher
+```
+
+---
+
+## Backend Setup
+
+```bash
+cd backend
+
+python -m venv venv
+
+source venv/bin/activate
+# Windows
+venv\Scripts\activate
+
+pip install -r requirements.txt
+```
+
+Create `.env`
+
+```env
+DATABASE_URL=
+
+GROQ_API_KEY=
+
+GEMINI_API_KEY=
+
+LLM_PROVIDER=groq
+```
+
+Run server
+
+```bash
+uvicorn main:app --reload
+```
+
+---
+
+## Frontend Setup
+
+```bash
+cd frontend
+
+npm install
+
+npm run dev
+```
+
+Create `.env.local`
+
+```env
+NEXT_PUBLIC_API_URL=
+
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=
+```
+
+Open
+
+```
+http://localhost:3000
+```
+
+---
+
+# 📂 Supported Files
+
+- PDF
+- DOCX
+- PPT
+- PPTX
+- TXT
+
+---
+
+# 🎯 Future Roadmap
+
+- ✅ AI Chat
+- ✅ Flashcards
+- ✅ Notes
+- ✅ Summaries
+- ✅ Quizzes
+- ✅ Google Authentication
+- ✅ Razorpay Integration
+- 🔄 Team Collaboration
+- 🔄 Mobile Application
+- 🔄 Voice Conversations
+- 🔄 AI Mind Maps
+- 🔄 Citation Export
+- 🔄 Multi-language Support
+
+---
+
+# 🤝 Contributing
+
+Contributions are welcome!
+
+1. Fork the repository
+
+2. Create a feature branch
+
+```bash
+git checkout -b feature-name
+```
+
+3. Commit changes
+
+```bash
+git commit -m "Added new feature"
+```
+
+4. Push changes
+
+```bash
+git push origin feature-name
+```
+
+5. Open a Pull Request
+
+---
+
+# 🌐 Live Demo
+
+**Website**
+
+https://decipherr.vercel.app
+
+---
+
+# 👨‍💻 Author
+
+**Aryan Bhardwaj**
+
+- LinkedIn: https://linkedin.com/in/aryanbhardwaj03
+- GitHub: https://github.com/aryanbhardwaj03
+
+---
+
+# ⭐ Support
+
+If you found this project helpful,
+
+⭐ Star the repository
+
+🍴 Fork it
+
+🧠 Share it with others
+
+Your support motivates future development!
+
+---
+
+# 📜 License
+
+This project is licensed under the **MIT License**.
