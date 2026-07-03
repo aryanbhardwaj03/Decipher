@@ -172,7 +172,7 @@ export default function DashboardPage() {
           <div className="lg:col-span-2 space-y-8">
             
             {/* Upload Box */}
-            <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 relative overflow-hidden flex flex-col sm:flex-row gap-6 sm:gap-8 shadow-sm transform-gpu" style={{ WebkitTransform: "translate3d(0,0,0)" }}>
+            <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 relative overflow-hidden flex flex-col sm:flex-row gap-6 sm:gap-8 shadow-sm" style={{ contain: 'paint' }}>
               <div className="flex-1 relative z-10">
                 <h2 className="text-2xl font-bold mb-3 text-foreground">Upload any document</h2>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-6 max-w-sm">
@@ -193,7 +193,7 @@ export default function DashboardPage() {
               
               {/* Graphic representation matching screenshot */}
               <div className="hidden sm:flex flex-1 items-center justify-center relative">
-                <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent rounded-full blur-3xl" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/10 to-transparent rounded-full" />
                 <div className="relative w-48 h-48">
                   {/* Faux icons representing documents floating */}
                   <div className="absolute top-4 left-4 w-12 h-12 bg-red-500 rounded-lg shadow-lg flex items-center justify-center transform -rotate-12 animate-pulse">

@@ -34,7 +34,6 @@ export function CookieConsent() {
           className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 z-[9999]"
         >
           <div className="bg-background border border-border rounded-xl shadow-xl p-5 flex flex-col gap-4 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-violet-600 to-indigo-500" />
             
             <div className="flex items-start gap-4">
               <div className="p-2 bg-primary/10 rounded-lg shrink-0">

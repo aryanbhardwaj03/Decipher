@@ -25,7 +25,7 @@ const navItems = [
 ];
 
 export function Sidebar({ onUploadClick, onClose }: { onUploadClick?: () => void, onClose?: () => void }) {
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
   const pathname = usePathname();
   const params = useParams();
   const id = params?.id as string | undefined;
@@ -85,22 +85,32 @@ export function Sidebar({ onUploadClick, onClose }: { onUploadClick?: () => void
 
       {/* Footer Area */}
       <div className="p-4 mt-auto">
-        {/* Upgrade Card */}
-        {user?.plan !== "Pro" && (
-          <Link href="/pricing" className="block p-4 rounded-2xl bg-card border border-border mb-4 hover:border-orange-500/50 transition-colors shadow-sm">
-            <h4 className="text-[14px] font-semibold flex items-center gap-2 text-foreground">
-              <Sparkles className="w-4 h-4 text-orange-500" />
-              Upgrade to <span className="text-orange-500">Pro</span>
-            </h4>
-            <p className="text-[12px] text-muted-foreground mt-2 mb-4 leading-relaxed">
-              Unlock unlimited uploads, advanced AI models and more.
-            </p>
-            <span className="text-[13px] font-semibold text-orange-500 flex items-center gap-1 hover:underline">
-              <span className="border-b border-orange-500">Upgrade Now</span> <span aria-hidden="true">&rarr;</span>
-            </span>
-          </Link>
+        {isGuest ? (
+          <div className="mb-4 space-y-2">
+            <Link href="/login?mode=signup" className="flex items-center justify-center w-full bg-primary text-primary-foreground py-2.5 rounded-xl font-bold text-sm shadow-sm hover:opacity-90 transition-opacity">
+              Sign Up Free
+            </Link>
+            <Link href="/login" className="flex items-center justify-center w-full bg-muted text-foreground py-2.5 rounded-xl font-bold text-sm hover:bg-muted/80 transition-colors">
+              Log In
+            </Link>
+          </div>
+        ) : (
+          /* Upgrade Card */
+          user?.plan !== "Pro" && (
+            <Link href="/pricing" className="block p-4 rounded-2xl bg-card border border-border mb-4 hover:border-orange-500/50 transition-colors shadow-sm">
+              <h4 className="text-[14px] font-semibold flex items-center gap-2 text-foreground">
+                <Sparkles className="w-4 h-4 text-orange-500" />
+                Upgrade to <span className="text-orange-500">Pro</span>
+              </h4>
+              <p className="text-[12px] text-muted-foreground mt-2 mb-4 leading-relaxed">
+                Unlock unlimited uploads, advanced AI models and more.
+              </p>
+              <span className="text-[13px] font-semibold text-orange-500 flex items-center gap-1 hover:underline">
+                <span className="border-b border-orange-500">Upgrade Now</span> <span aria-hidden="true">&rarr;</span>
+              </span>
+            </Link>
+          )
         )}
-
       </div>
     </aside>
   );
