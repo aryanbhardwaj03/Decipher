@@ -1,16 +1,57 @@
-# Decipher — AI-Powered 
+<div align="center">
+  <img src="./assets/hero.png" alt="Decipher Logo" width="600" />
+  
+  <h3 align="center">Your Intelligent Study Companion</h3>
 
-Decipher is an intelligent, AI-powered study companion that transforms how you interact with your documents. Upload PDFs, Word documents, or presentations, and instantly unlock interactive chats, automated summaries, quizzes, and flashcards.
+  <p align="center">
+    Transform how you interact with your documents. Instantly unlock interactive chats, automated summaries, quizzes, and flashcards.
+    <br />
+    <a href="https://github.com/aryanbhardwaj03/Decipher"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="#">View Demo</a>
+    ·
+    <a href="https://github.com/aryanbhardwaj03/Decipher/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/aryanbhardwaj03/Decipher/issues">Request Feature</a>
+  </p>
+</div>
 
-## 🌟 Key Features
+---
 
-- **Conversational Document Chat (RAG)**: Chat directly with your documents. Ask questions and get answers with precise page citations.
+## 🚀 About Decipher
+
+**Decipher** is not just another PDF viewer—it's a comprehensive AI study assistant designed to help students, researchers, and professionals extract knowledge from their documents faster than ever before.
+
+By combining cutting-edge Large Language Models (LLMs) with Vector Search (RAG), Decipher allows you to converse directly with your notes, auto-generate study materials, and build a personalized knowledge base.
+
+![Decipher Dashboard](./assets/dashboard.png)
+
+### 🌟 Why Decipher?
+
+- **Conversational Document Chat**: Chat directly with your documents. Ask questions and get answers with precise, clickable page citations.
 - **Smart Summarization**: Generate instant, comprehensive summaries of lengthy study materials.
 - **Auto-Generated Quizzes**: Test your knowledge with AI-generated multiple-choice questions based directly on your document's content.
 - **Interactive Flashcards**: Quickly review key concepts with auto-generated flashcards.
-- **Multi-Format Support**: Upload PDFs, DOCX, PPTX, TXT, and Markdown files.
-- **Rich Document Viewer**: View your documents side-by-side while chatting, with clickable page citations that jump straight to the source.
-- **Sleek, Modern UI**: Built with a beautiful, responsive dark-mode-first interface using Tailwind CSS and glassmorphism design.
+- **Seamless Onboarding**: Simple, secure sign-in with Google OAuth.
+
+![Decipher Navigation & Tools](./assets/navigation.png)
+
+---
+
+## 📸 Sneak Peek
+
+### The AI Summarizer
+No more reading 100-page documents to find the main idea. Upload your file, and let Decipher distill it for you.
+![AI Summarizer](./assets/summarizer.png)
+
+### Secure Login
+Your documents are securely stored and tied to your account across all your devices.
+<div align="center">
+  <img src="./assets/login.png" alt="Secure Login" width="500" />
+</div>
+
+---
 
 ## 🏗️ Architecture
 
@@ -30,7 +71,9 @@ Decipher is built using a modern, scalable tech stack:
   - **Embeddings**: [Google Gemini](https://ai.google.dev/) (`gemini-embedding-001`) for 768-dimensional document vectorization.
 - **Document Processing**: PyMuPDF, OCR integrations for text extraction.
 
-## 🚀 Getting Started
+---
+
+## 💻 Getting Started
 
 ### Prerequisites
 - Node.js (v18+)
@@ -85,6 +128,8 @@ Decipher is built using a modern, scalable tech stack:
    npm run dev
    ```
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
 
 ## 🌐 Deployment
 
