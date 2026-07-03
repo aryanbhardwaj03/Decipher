@@ -172,7 +172,7 @@ export default function DashboardPage() {
           <div className="lg:col-span-2 space-y-8">
             
             {/* Upload Box */}
-            <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 relative overflow-hidden flex flex-col sm:flex-row gap-6 sm:gap-8 shadow-sm">
+            <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 relative overflow-hidden flex flex-col sm:flex-row gap-6 sm:gap-8 shadow-sm transform-gpu" style={{ WebkitTransform: "translate3d(0,0,0)" }}>
               <div className="flex-1 relative z-10">
                 <h2 className="text-2xl font-bold mb-3 text-foreground">Upload any document</h2>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-6 max-w-sm">

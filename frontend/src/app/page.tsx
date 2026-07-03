@@ -206,8 +206,12 @@ export default function OnboardingPage() {
       
       {/* Footer */}
       <footer className="shrink-0 border-t border-border bg-background p-4 text-xs text-muted-foreground">
-        <div className="max-w-7xl mx-auto flex justify-center sm:justify-between px-2">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between px-2 gap-4">
           <span>© Decipher 2026 ® - Decipher your Document</span>
+          <div className="flex gap-4">
+            <Link href="/privacy" className="hover:underline hover:text-primary transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:underline hover:text-primary transition-colors">Terms & Conditions</Link>
+          </div>
         </div>
       </footer>
     </div>

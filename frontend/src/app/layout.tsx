@@ -23,6 +23,7 @@ import { NotificationProvider } from "@/components/providers/NotificationProvide
 import { Analytics } from "@vercel/analytics/next";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import NextTopLoader from "nextjs-toploader";
+import { CookieConsent } from "@/components/ui/CookieConsent";
 
 export default function RootLayout({
   children,
@@ -43,6 +44,7 @@ export default function RootLayout({
                 <Analytics />
                 <Toaster />
                 <GuestPrompt />
+                <CookieConsent />
               </NotificationProvider>
             </AuthProvider>
           </ThemeProvider>
