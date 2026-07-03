@@ -196,7 +196,7 @@ export default function DashboardPage() {
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/10 to-transparent rounded-full" />
                 <div className="relative w-48 h-48">
                   {/* Faux icons representing documents floating */}
-                  <div className="absolute top-4 left-4 w-12 h-12 bg-red-500 rounded-lg shadow-lg flex items-center justify-center transform -rotate-12 animate-pulse">
+                  <div className="absolute top-4 left-4 w-12 h-12 bg-red-500 rounded-lg shadow-lg flex items-center justify-center transform -rotate-12">
                     <span className="text-white text-xs font-bold">PDF</span>
                   </div>
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-blue-500 rounded-xl shadow-xl flex items-center justify-center z-10">
