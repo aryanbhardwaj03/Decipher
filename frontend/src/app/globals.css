@@ -139,6 +139,9 @@
    BASE RESET
    ═══════════════════════════════════════════════════════════════════ */
 @layer base {
+  html {
+    font-size: 18px; /* Globally scales up typography and spacing */
+  }
   * {
     border-color: hsl(var(--border));
   }
