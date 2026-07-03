@@ -100,7 +100,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       {/* Floating Individual Notification Popup */}
       {isToastOpen && latestNotification && (
         <div 
-          className="fixed bottom-4 right-4 z-50 animate-[slideInRight_0.3s_ease-out]"
+          className="fixed top-20 right-4 z-50 animate-[slideInRight_0.3s_ease-out]"
           onMouseEnter={() => { if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current); }}
           onMouseLeave={() => {
             autoCloseTimer.current = setTimeout(() => setIsToastOpen(false), 3000);
