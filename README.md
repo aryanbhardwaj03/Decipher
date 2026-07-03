@@ -1,7 +1,5 @@
 # Decipher — AI-Powered 
 
-![Decipher Hero Image](https://via.placeholder.com/1200x600/09090b/ea580c?text=Decipher+-+Unlock+Your+Documents)
-
 Decipher is an intelligent, AI-powered study companion that transforms how you interact with your documents. Upload PDFs, Word documents, or presentations, and instantly unlock interactive chats, automated summaries, quizzes, and flashcards.
 
 ## 🌟 Key Features
