@@ -54,3 +54,4 @@ sse-starlette>=2.0.0
 # ── Payments ──────────────────────────────────────────
 razorpay>=1.4.1
 tenacity>=8.3.0
+pgvector>=0.4.2
