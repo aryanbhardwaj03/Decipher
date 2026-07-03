@@ -21,7 +21,26 @@ from api.middleware.auth import (
 )
 from core.email import send_otp_email, send_welcome_email
 
+from sqlalchemy.orm.attributes import flag_modified
+
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+def _ensure_welcome_email(user, db: Session):
+    """Ensures the welcome email is sent to the user exactly once."""
+    prefs = user.ai_preferences or {}
+    if isinstance(prefs, str):
+        import json
+        try:
+            prefs = json.loads(prefs)
+        except:
+            prefs = {}
+            
+    if not prefs.get("welcome_email_sent"):
+        send_welcome_email(user.email, user.name)
+        prefs["welcome_email_sent"] = True
+        user.ai_preferences = prefs
+        flag_modified(user, "ai_preferences")
+        db.commit()
 
 
 # ── Schemas ───────────────────────────────────────────────────────────────
@@ -133,7 +152,7 @@ def register(
     token = create_access_token({"sub": user.id, "email": user.email})
     
     # Send welcome email for new user
-    send_welcome_email(user.email, user.name)
+    _ensure_welcome_email(user, db)
 
     return TokenResponse(
         access_token=token,
@@ -167,6 +186,8 @@ def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
         )
+        
+    _ensure_welcome_email(user, db)
 
     token = create_access_token({"sub": user.id, "email": user.email})
 
@@ -201,8 +222,8 @@ def google_auth(
             avatar_url=req.avatar_url,
             provider="google",
         )
-        # Send welcome email for new user
-        send_welcome_email(user.email, user.name)
+        
+    _ensure_welcome_email(user, db)
 
     if x_guest_id:
         safe_guest_id = "".join(c for c in x_guest_id.lower() if c.isalnum() or c in ("-", "_"))[:72]
