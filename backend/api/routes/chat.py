@@ -125,8 +125,11 @@ async def _generate_rag_stream(
             key = f"p{page}"
             if key not in seen:
                 raw_score = r.get("score", 0.0)
-                score_val = float(raw_score) if raw_score is not None else 0.0
-                if math.isnan(score_val):
+                try:
+                    score_val = float(raw_score) if raw_score is not None else 0.0
+                    if math.isnan(score_val) or math.isinf(score_val):
+                        score_val = 0.0
+                except (ValueError, TypeError):
                     score_val = 0.0
                 
                 sources.append({
