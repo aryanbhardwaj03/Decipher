@@ -75,14 +75,13 @@ async def _generate_notes_stream(
         llm = get_llm_engine()
 
         description = NOTE_TYPES[note_type]
-        query = custom_focus or description
-        results = vs.search_by_doc(query, doc_id, top_k=15)
+        results = vs.get_all_chunks_by_doc(doc_id)
 
         if not results:
-            yield f"data: {json.dumps({'type': 'error', 'content': 'This type of content is not given in PDF.'})}\n\n"
+            yield f"data: {json.dumps({'type': 'error', 'content': 'This document has no readable text.'})}\n\n"
             return
 
-        combined = "\n\n".join([r["text"] for r in results])[:8000]
+        combined = "\n\n".join([r["text"] for r in results])[:100000]
 
         prompt = f"""Generate {description} from the following document content.
 

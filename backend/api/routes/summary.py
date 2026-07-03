@@ -68,14 +68,15 @@ async def _generate_summary_stream(
         vs = get_vector_store()
         llm = get_llm_engine()
 
-        query = custom_focus or "main findings, methodology, results, conclusions, key points"
-        results = vs.search_by_doc(query, doc_id, top_k=15)
+        # Retrieve all chunks for comprehensive context
+        results = vs.get_all_chunks_by_doc(doc_id)
 
         if not results:
-            yield f"data: {json.dumps({'type': 'error', 'content': 'This type of content is not given in PDF.'})}\n\n"
+            yield f"data: {json.dumps({'type': 'error', 'content': 'This document has no readable text.'})}\n\n"
             return
 
-        combined = "\n\n".join([r["text"] for r in results])[:8000]
+        # Combine up to ~100k characters (~25k tokens), which fits in modern context windows
+        combined = "\n\n".join([r["text"] for r in results])[:100000]
         prompt = build_summary_prompt(combined, level=summary_type)
 
         if custom_focus:

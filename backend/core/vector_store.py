@@ -115,6 +115,15 @@ class PgVectorStore:
         finally:
             db.close()
 
+    def get_all_chunks_by_doc(self, doc_id: str) -> list[dict]:
+        db = SessionLocal()
+        try:
+            stmt = select(DocumentChunk).filter(DocumentChunk.document_id == doc_id).order_by(DocumentChunk.id)
+            chunks = db.scalars(stmt).all()
+            return [{"text": c.text, "metadata": c.metadata_json, "score": 1.0} for c in chunks]
+        finally:
+            db.close()
+
     def keyword_search(self, query: str, doc_id: str, top_k: int = 10) -> list[dict]:
         query_lower = query.lower()
         words = query_lower.split()
@@ -208,6 +217,14 @@ class FaissVectorStore:
         all_results = self.search(query, top_k=self.size)
         filtered = [r for r in all_results if r["metadata"].get("doc_id") == doc_id]
         return filtered[:top_k]
+
+    def get_all_chunks_by_doc(self, doc_id: str) -> list[dict]:
+        filtered = [
+            {"text": doc["text"], "metadata": doc["metadata"], "score": 1.0} 
+            for doc in self.documents 
+            if doc["metadata"].get("doc_id") == doc_id
+        ]
+        return filtered
 
     def keyword_search(self, query: str, doc_id: str, top_k: int = 10) -> list[dict]:
         query_lower = query.lower()

@@ -76,14 +76,42 @@ async def _generate_rag_stream(
     """Generate a streaming RAG response as SSE events."""
     from core.vector_store import get_vector_store
     from core.llm_engine import get_llm_engine
-    from utils.prompt_templates import RAG_SYSTEM_PROMPT, build_rag_prompt
+    from utils.prompt_templates import RAG_SYSTEM_PROMPT
+    from db import crud
 
     try:
         vs = get_vector_store()
         llm = get_llm_engine()
 
-        # Retrieve relevant chunks
-        results = vs.search_by_doc(question, doc_id, top_k=top_k)
+        # Fetch chat history for context
+        # Limit to last 6 messages (3 turns)
+        chat_history_records = crud.get_chat_history(db, doc_id, user_id, limit=6)
+        
+        # chat_history_records is ordered by created_at DESC (newest first)
+        # We need to reverse it to chronological order
+        chat_history_records.reverse()
+
+        # Build a conversation string
+        conversation_context = ""
+        last_few_messages = ""
+        for msg in chat_history_records:
+            role = "User" if msg.role == "user" else "AI"
+            conversation_context += f"{role}: {msg.content}\n\n"
+            last_few_messages += f"{msg.content} "
+
+        # Enhance the vector search query by prepending recent history to the current question
+        # This helps resolve pronouns and contextual references
+        search_query = question
+        if len(chat_history_records) > 1:
+            # Add the last message (excluding the current one which might not be in history yet, actually it is in history because we just saved it in chat_with_document)
+            # Wait, chat_with_document saves the CURRENT message before calling this function!
+            # So chat_history_records includes the current question as the very last item.
+            if len(chat_history_records) >= 2:
+                previous_msg = chat_history_records[-2].content
+                search_query = f"{previous_msg} {question}"
+
+        # Retrieve relevant chunks using the enhanced search query
+        results = vs.search_by_doc(search_query, doc_id, top_k=top_k)
 
         # Build context
         context_parts = []
@@ -101,8 +129,13 @@ async def _generate_rag_stream(
                 })
                 seen.add(key)
 
-        context = "\n\n---\n\n".join(context_parts) if context_parts else "No relevant context found."
-        prompt = build_rag_prompt(question, context)
+        context_text = "\n\n---\n\n".join(context_parts) if context_parts else "No relevant context found."
+        # Construct the final prompt with conversation history and retrieved context
+        prompt = (
+            f"Here is the conversation history so far:\n{conversation_context}\n"
+            f"Here is the retrieved context from the document:\n{context_text}\n\n"
+            f"Current question: {question}"
+        )
 
         # Stream LLM response
         full_response = ""

@@ -60,17 +60,13 @@ def generate_quiz(
     vs = get_vector_store()
     llm = get_llm_engine()
 
-    query = req.topic_focus or "key concepts, important details, definitions, formulas"
-    results = vs.search_by_doc(query, doc_id, top_k=12)
-
-    if not results and not req.topic_focus:
-        # Fallback: get first 12 chunks of the document if generic search fails
-        results = [{"text": doc["text"]} for doc in vs.documents if doc["metadata"].get("doc_id") == doc_id][:12]
+    results = vs.get_all_chunks_by_doc(doc_id)
 
     if not results:
-        raise HTTPException(status_code=400, detail="This type of content is not given in PDF")
+        raise HTTPException(status_code=400, detail="This document has no readable text.")
 
-    combined = "\n\n".join([r["text"] for r in results])[:6000]
+    # Combine up to ~100k characters (~25k tokens), which fits in modern context windows
+    combined = "\n\n".join([r["text"] for r in results])[:100000]
 
     prompt = build_structured_quiz_prompt(
         text=combined,
