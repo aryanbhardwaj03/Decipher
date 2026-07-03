@@ -1,4 +1,4 @@
-﻿import logging
+import logging
 from typing import Optional
 import numpy as np
 from config import settings
@@ -34,6 +34,7 @@ class EmbeddingEngine:
                     model=self.model_name,
                     content=batch,
                     task_type="retrieval_document",
+                    output_dimensionality=settings.EMBEDDING_DIMENSION,
                 )
                 if isinstance(response, dict) and "embedding" in response:
                     batch_embeddings = response["embedding"]
@@ -53,6 +54,7 @@ class EmbeddingEngine:
                 model=self.model_name,
                 content=[query],
                 task_type="retrieval_query",
+                output_dimensionality=settings.EMBEDDING_DIMENSION,
             )
             embedding = response["embedding"]
             if isinstance(embedding[0], list):

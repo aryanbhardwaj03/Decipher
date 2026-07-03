@@ -9,20 +9,24 @@ class GeminiREST:
         self.api_key = api_key
         self.base_url = "https://generativelanguage.googleapis.com/v1beta/models"
 
-    def embed_content(self, model: str, content: list[str], task_type: str = "retrieval_document"):
+    def embed_content(self, model: str, content: list[str], task_type: str = "retrieval_document", output_dimensionality: int = None):
         if not self.api_key:
-            return {"embedding": [[0.0] * 768 for _ in content]}
+            dim = output_dimensionality or 768
+            return {"embedding": [[0.0] * dim for _ in content]}
         
         model_path = model if model.startswith("models/") else f"models/{model}"
         url = f"{self.base_url}/{model_path.replace('models/', '')}:batchEmbedContents?key={self.api_key}"
         
         requests = []
         for text in content:
-            requests.append({
+            req_item = {
                 "model": model_path,
                 "content": {"parts": [{"text": text}]},
                 "taskType": task_type.upper()
-            })
+            }
+            if output_dimensionality:
+                req_item["outputDimensionality"] = output_dimensionality
+            requests.append(req_item)
             
         payload = {"requests": requests}
         
