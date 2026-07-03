@@ -137,7 +137,7 @@ export default function LoginPage() {
 
         {/* Logo */}
         <div className="flex items-center gap-2.5 mb-8">
-          <img src="/logo-mark.png" alt="Decipher Logo" className="w-9 h-9 object-contain" />
+          <img src="/logo-mark.png" alt="Decipher Logo" className="w-9 h-9 object-contain rounded-full bg-white p-[2px]" />
           <span className="text-xl font-bold tracking-tight gradient-text">Decipher</span>
         </div>
 

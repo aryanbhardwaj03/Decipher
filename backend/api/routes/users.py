@@ -8,12 +8,12 @@ import shutil
 from db.database import get_db
 from db import crud
 from api.middleware.auth import get_current_user, verify_password, hash_password
-from config import settings
+from config import settings, UPLOAD_DIR
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
 # Ensure avatar directory exists
-AVATAR_DIR = os.path.join(settings.LOCAL_UPLOAD_DIR, "avatars")
+AVATAR_DIR = os.path.join(UPLOAD_DIR, "avatars")
 os.makedirs(AVATAR_DIR, exist_ok=True)
 
 class PasswordChangeRequest(BaseModel):

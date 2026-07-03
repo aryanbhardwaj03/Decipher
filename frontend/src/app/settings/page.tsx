@@ -268,7 +268,7 @@ export default function SettingsPage({ searchParams }: SettingsPageProps) {
                       <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center border-4 border-background shadow-sm text-3xl font-bold text-muted-foreground overflow-hidden">
                         {user?.avatar_url ? (
                           <img
-                            src={`${API_BASE}${user.avatar_url}`}
+                            src={user.avatar_url.startsWith('http') ? user.avatar_url : `${API_BASE}${user.avatar_url}?t=${new Date().getTime()}`}
                             alt="Avatar"
                             className="w-full h-full object-cover"
                           />

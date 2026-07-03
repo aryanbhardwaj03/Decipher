@@ -53,7 +53,7 @@ export default function OnboardingPage() {
       <header className="relative z-50 flex h-[72px] items-center justify-between bg-background px-4 sm:px-6 shadow-sm border-b border-border">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <img src="/logo-mark.png" alt="Decipher Logo" className="h-8 w-8 object-contain" />
+            <img src="/logo-mark.png" alt="Decipher Logo" className="h-8 w-8 object-contain rounded-full bg-white p-[2px]" />
             <span className="text-[20px] sm:text-[22px] font-bold tracking-tight">Decipher</span>
           </Link>
           

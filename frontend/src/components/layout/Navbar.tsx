@@ -20,6 +20,7 @@ import { useState, useRef, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 
 import { NotificationCenter } from "./NotificationCenter";
+import { API_BASE } from "@/lib/constants";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -51,7 +52,7 @@ export function Navbar() {
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center gap-2 group">
-            <img src="/logo-mark.png" alt="Decipher Logo" className="w-8 h-8 object-contain group-hover:scale-105 transition-transform" />
+            <img src="/logo-mark.png" alt="Decipher Logo" className="w-8 h-8 object-contain group-hover:scale-105 transition-transform rounded-full bg-white p-[2px]" />
             <span className="text-base font-bold tracking-tight gradient-text hidden sm:block">
               Decipher
             </span>
@@ -121,9 +122,17 @@ export function Navbar() {
                 </div>
 
                 {/* Avatar */}
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-500 flex items-center justify-center text-white text-xs font-bold">
-                  {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"}
-                </div>
+                {user?.avatar_url ? (
+                  <img
+                    src={user.avatar_url.startsWith('http') ? user.avatar_url : `${API_BASE}${user.avatar_url}?t=${new Date().getTime()}`}
+                    alt="Avatar"
+                    className="w-7 h-7 rounded-lg object-cover"
+                  />
+                ) : (
+                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-500 flex items-center justify-center text-white text-xs font-bold">
+                    {user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"}
+                  </div>
+                )}
 
                 {/* Logout */}
                 <button

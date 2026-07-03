@@ -36,7 +36,7 @@ export function Sidebar({ onUploadClick, onClose }: { onUploadClick?: () => void
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <img src="/logo-mark.png" alt="Decipher Logo" className="w-6 h-6 object-contain" />
+            <img src="/logo-mark.png" alt="Decipher Logo" className="w-6 h-6 object-contain rounded-full bg-white p-[2px]" />
             <div>
               <h1 className="font-bold text-[15px] leading-tight">Decipher</h1>
               <p className="text-[10px] text-muted-foreground tracking-tight">Decipher your Document</p>
