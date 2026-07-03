@@ -1,4 +1,4 @@
-# Decipher — AI-Powered Study Assistant
+# Decipher — AI-Powered 
 
 ![Decipher Hero Image](https://via.placeholder.com/1200x600/09090b/ea580c?text=Decipher+-+Unlock+Your+Documents)
 
