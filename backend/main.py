@@ -31,6 +31,67 @@ async def lifespan(app: FastAPI):
     create_tables()
     logger.info("Database tables created/verified.")
 
+    # Auto re-embed documents in background (needed after embedding model migration)
+    import threading
+    def _auto_reembed():
+        import time
+        time.sleep(5)  # Wait for full startup
+        try:
+            from core.embeddings import get_embedding_engine
+            from db.models import DocumentChunk
+            from db.database import SessionLocal
+            import numpy as np
+
+            embed = get_embedding_engine()
+            db = SessionLocal()
+            try:
+                # Find chunks that need re-embedding (zero vectors = failed old model)
+                chunks = db.query(DocumentChunk).limit(5).all()
+                needs_reembed = False
+                for c in chunks:
+                    if c.embedding is not None:
+                        vec = np.array(c.embedding)
+                        if np.all(vec == 0) or np.any(np.isnan(vec)):
+                            needs_reembed = True
+                            break
+                
+                if not needs_reembed and chunks:
+                    # Test if current embeddings work by doing a test query
+                    try:
+                        test_emb = embed.embed_query("test")
+                        if np.all(test_emb == 0):
+                            needs_reembed = True
+                    except:
+                        needs_reembed = True
+
+                if not needs_reembed:
+                    logger.info("Embeddings look healthy, skipping re-embed.")
+                    return
+
+                logger.info("Detected stale embeddings, starting auto re-embed...")
+                all_chunks = db.query(DocumentChunk).all()
+                
+                batch_size = 32
+                for i in range(0, len(all_chunks), batch_size):
+                    batch = all_chunks[i:i + batch_size]
+                    texts = [c.text for c in batch]
+                    try:
+                        new_embeddings = embed.embed_texts(texts)
+                        for j, chunk in enumerate(batch):
+                            chunk.embedding = new_embeddings[j].tolist()
+                        db.commit()
+                    except Exception as e:
+                        db.rollback()
+                        logger.error(f"Re-embed batch {i} failed: {e}")
+                
+                logger.info(f"Auto re-embed complete: {len(all_chunks)} chunks updated.")
+            finally:
+                db.close()
+        except Exception as e:
+            logger.error(f"Auto re-embed failed: {e}")
+    
+    threading.Thread(target=_auto_reembed, daemon=True).start()
+
     yield
 
     logger.info("Shutting down.")

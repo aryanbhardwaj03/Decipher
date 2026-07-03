@@ -299,6 +299,95 @@ def toggle_document_favorite(
     return {"is_favorite": updated.is_favorite}
 
 
+@router.post("/{doc_id}/reembed")
+def reembed_document(
+    doc_id: str,
+    user=Depends(get_current_or_guest_user),
+    db: Session = Depends(get_db),
+):
+    """Re-embed all chunks for a document with the current embedding model."""
+    doc = crud.get_document(db, doc_id)
+    if not doc or doc.user_id != user.id:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    from core.embeddings import get_embedding_engine
+    from db.models import DocumentChunk
+    from db.database import SessionLocal
+
+    embed = get_embedding_engine()
+    reembed_db = SessionLocal()
+    try:
+        chunks = reembed_db.query(DocumentChunk).filter(
+            DocumentChunk.document_id == doc_id
+        ).all()
+
+        if not chunks:
+            return {"message": "No chunks to re-embed", "count": 0}
+
+        texts = [c.text for c in chunks]
+        new_embeddings = embed.embed_texts(texts)
+
+        for i, chunk in enumerate(chunks):
+            chunk.embedding = new_embeddings[i].tolist()
+
+        reembed_db.commit()
+        return {"message": f"Re-embedded {len(chunks)} chunks", "count": len(chunks)}
+    except Exception as e:
+        reembed_db.rollback()
+        logger.error(f"Re-embed failed for {doc_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        reembed_db.close()
+
+
+@router.post("/reembed-all")
+def reembed_all_documents(
+    background_tasks: BackgroundTasks,
+    user=Depends(get_current_or_guest_user),
+    db: Session = Depends(get_db),
+):
+    """Re-embed all documents for the current user (runs in background)."""
+    docs = db.query(Document).filter(
+        Document.user_id == user.id,
+        Document.status == "ready",
+    ).all()
+
+    if not docs:
+        return {"message": "No documents to re-embed"}
+
+    doc_ids = [d.id for d in docs]
+
+    def _reembed_all_task(doc_ids: list[str]):
+        from core.embeddings import get_embedding_engine
+        from db.models import DocumentChunk
+        from db.database import SessionLocal
+
+        embed = get_embedding_engine()
+        task_db = SessionLocal()
+        try:
+            for did in doc_ids:
+                try:
+                    chunks = task_db.query(DocumentChunk).filter(
+                        DocumentChunk.document_id == did
+                    ).all()
+                    if not chunks:
+                        continue
+                    texts = [c.text for c in chunks]
+                    new_embeddings = embed.embed_texts(texts)
+                    for i, chunk in enumerate(chunks):
+                        chunk.embedding = new_embeddings[i].tolist()
+                    task_db.commit()
+                    logger.info(f"Re-embedded {len(chunks)} chunks for doc {did}")
+                except Exception as e:
+                    task_db.rollback()
+                    logger.error(f"Re-embed failed for doc {did}: {e}")
+        finally:
+            task_db.close()
+
+    background_tasks.add_task(_reembed_all_task, doc_ids)
+    return {"message": f"Re-embedding {len(doc_ids)} documents in background"}
+
+
 # ── Background Processing ─────────────────────────────────────────────────
 
 def process_document_task(doc_id: str, file_path: str, file_type: str):
