@@ -1,6 +1,11 @@
 import os
 import threading
 import json
+import smtplib
+from email.message import EmailMessage
+from dotenv import load_dotenv
+
+load_dotenv()
 
 try:
     import httpx
@@ -11,39 +16,56 @@ BREVO_API_KEY = os.environ.get("BREVO_API_KEY", "")
 FROM_EMAIL = os.environ.get("FROM_EMAIL", "aryan.bhardwaj2323@gmail.com")
 FROM_NAME = os.environ.get("FROM_NAME", "Decipher")
 
+SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = os.environ.get("SMTP_PORT", 587)
+SMTP_USER = os.environ.get("SMTP_USER", "")
+SMTP_PASS = os.environ.get("SMTP_PASS", "")
 
 def _send_email_sync(to_email: str, subject: str, html_content: str):
-    """Send email via Brevo (Sendinblue) HTTP API."""
-    if not BREVO_API_KEY:
-        print(f"⚠️ BREVO_API_KEY not configured. Skipping email to {to_email}: {subject}")
+    """Send email via Brevo (Sendinblue) HTTP API or fallback to SMTP."""
+    if BREVO_API_KEY and httpx is not None:
+        try:
+            response = httpx.post(
+                "https://api.brevo.com/v3/smtp/email",
+                headers={
+                    "api-key": BREVO_API_KEY,
+                    "Content-Type": "application/json",
+                    "accept": "application/json",
+                },
+                json={
+                    "sender": {"name": FROM_NAME, "email": FROM_EMAIL},
+                    "to": [{"email": to_email}],
+                    "subject": subject,
+                    "htmlContent": html_content,
+                },
+                timeout=10,
+            )
+            if response.status_code in (200, 201):
+                print(f"✅ Email sent to {to_email} via Brevo: {subject}")
+            else:
+                print(f"❌ Brevo API error ({response.status_code}): {response.text}")
+        except Exception as e:
+            print(f"❌ Failed to send email via Brevo to {to_email}: {e}")
         return
 
-    if httpx is None:
-        print(f"⚠️ 'httpx' library not installed. Cannot send email.")
+    if SMTP_USER and SMTP_PASS:
+        try:
+            msg = EmailMessage()
+            msg.set_content(html_content, subtype='html')
+            msg['Subject'] = subject
+            msg['From'] = f"{FROM_NAME} <{FROM_EMAIL}>" if FROM_EMAIL else SMTP_USER
+            msg['To'] = to_email
+
+            with smtplib.SMTP(SMTP_HOST, int(SMTP_PORT)) as server:
+                server.starttls()
+                server.login(SMTP_USER, SMTP_PASS)
+                server.send_message(msg)
+            print(f"✅ Email sent to {to_email} via SMTP: {subject}")
+        except Exception as e:
+            print(f"❌ Failed to send email via SMTP to {to_email}: {e}")
         return
 
-    try:
-        response = httpx.post(
-            "https://api.brevo.com/v3/smtp/email",
-            headers={
-                "api-key": BREVO_API_KEY,
-                "Content-Type": "application/json",
-                "accept": "application/json",
-            },
-            json={
-                "sender": {"name": FROM_NAME, "email": FROM_EMAIL},
-                "to": [{"email": to_email}],
-                "subject": subject,
-                "htmlContent": html_content,
-            },
-            timeout=10,
-        )
-        if response.status_code in (200, 201):
-            print(f"✅ Email sent to {to_email}: {subject}")
-        else:
-            print(f"❌ Brevo API error ({response.status_code}): {response.text}")
-    except Exception as e:
-        print(f"❌ Failed to send email to {to_email}: {e}")
+    print(f"⚠️ Neither BREVO_API_KEY nor SMTP_USER configured. Skipping email to {to_email}: {subject}")
 
 
 def _send_email(to_email: str, subject: str, html_content: str):
