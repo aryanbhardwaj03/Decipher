@@ -117,15 +117,21 @@ async def _generate_rag_stream(
         context_parts = []
         sources = []
         seen = set()
+        import math
         for r in results:
             page = r["metadata"].get("page", "?")
             context_parts.append(f"[Page {page}]\n{r['text']}")
 
             key = f"p{page}"
             if key not in seen:
+                raw_score = r.get("score", 0.0)
+                score_val = float(raw_score) if raw_score is not None else 0.0
+                if math.isnan(score_val):
+                    score_val = 0.0
+                
                 sources.append({
                     "page": page,
-                    "score": round(r["score"], 3),
+                    "score": round(score_val, 3),
                 })
                 seen.add(key)
 
