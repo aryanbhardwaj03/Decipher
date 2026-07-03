@@ -41,11 +41,11 @@ def _send_email_sync(to_email: str, subject: str, html_content: str):
                 timeout=10,
             )
             if response.status_code in (200, 201):
-                print(f"✅ Email sent to {to_email} via Brevo: {subject}")
+                print(f"[SUCCESS] Email sent to {to_email} via Brevo: {subject}")
             else:
-                print(f"❌ Brevo API error ({response.status_code}): {response.text}")
+                print(f"[ERROR] Brevo API error ({response.status_code}): {response.text}")
         except Exception as e:
-            print(f"❌ Failed to send email via Brevo to {to_email}: {e}")
+            print(f"[ERROR] Failed to send email via Brevo to {to_email}: {e}")
         return
 
     if SMTP_USER and SMTP_PASS:
@@ -60,12 +60,12 @@ def _send_email_sync(to_email: str, subject: str, html_content: str):
                 server.starttls()
                 server.login(SMTP_USER, SMTP_PASS)
                 server.send_message(msg)
-            print(f"✅ Email sent to {to_email} via SMTP: {subject}")
+            print(f"[SUCCESS] Email sent to {to_email} via SMTP: {subject}")
         except Exception as e:
-            print(f"❌ Failed to send email via SMTP to {to_email}: {e}")
+            print(f"[ERROR] Failed to send email via SMTP to {to_email}: {e}")
         return
 
-    print(f"⚠️ Neither BREVO_API_KEY nor SMTP_USER configured. Skipping email to {to_email}: {subject}")
+    print(f"[WARN] Neither BREVO_API_KEY nor SMTP_USER configured. Skipping email to {to_email}: {subject}")
 
 
 def _send_email(to_email: str, subject: str, html_content: str):
@@ -104,8 +104,8 @@ def send_otp_email(to_email: str, otp_code: str):
 
 
 def send_welcome_email(to_email: str, name: str):
-    """Send a welcome email with upselling for Plus and Pro plans."""
-    subject = "Welcome to Decipher! 🎉 Unlock the full power of AI"
+    """Send a welcome email with simple transactional text to avoid spam/promotions."""
+    subject = "Welcome to Decipher!"
     greeting = f"Hi {name}," if name else "Hi there,"
     
     html_content = f"""
@@ -120,40 +120,8 @@ def send_welcome_email(to_email: str, name: str):
         <h2 style="color: #ea580c;">{greeting} Welcome to Decipher!</h2>
         <p>We're thrilled to have you on board. You can now start uploading your documents and let our AI uncover the knowledge hidden within them through summaries, chat, quizzes, flashcards, and more.</p>
         
-        <div style="margin: 30px 0; padding: 24px; border: 1px solid #e5e7eb; border-radius: 16px; background: #fafafa;">
-            <h3 style="margin-top: 0; color: #111;">🚀 Want to get more out of Decipher?</h3>
-            <p style="font-size: 14px; color: #555;">You're currently on our <strong>Basic</strong> plan. Upgrade today to supercharge your workflow!</p>
-            
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 20px;">
-                <tr>
-                    <td width="50%" style="padding-right: 8px;" valign="top">
-                        <div style="background: white; border: 2px solid #ea580c; border-radius: 12px; padding: 16px;">
-                            <h4 style="margin: 0 0 10px 0; color: #ea580c;">⚡ Plus Plan</h4>
-                            <ul style="padding-left: 16px; margin: 0; font-size: 13px; color: #555; line-height: 1.8;">
-                                <li>Unlimited uploads</li>
-                                <li>Unlimited cloud storage</li>
-                                <li>AI summaries &amp; notes</li>
-                            </ul>
-                        </div>
-                    </td>
-                    <td width="50%" style="padding-left: 8px;" valign="top">
-                        <div style="background: white; border: 2px solid #7c3aed; border-radius: 12px; padding: 16px;">
-                            <h4 style="margin: 0 0 10px 0; color: #7c3aed;">💎 Pro Plan</h4>
-                            <ul style="padding-left: 16px; margin: 0; font-size: 13px; color: #555; line-height: 1.8;">
-                                <li>Everything in Plus</li>
-                                <li>Premium AI Chat</li>
-                                <li>Priority processing</li>
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-            
-            <div style="text-align: center; margin-top: 24px;">
-                <a href="https://decipherr.vercel.app/pricing" style="display: inline-block; background: linear-gradient(135deg, #ea580c, #f97316); color: white; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">View Pricing Plans →</a>
-            </div>
-        </div>
-        
+        <p>If you have any questions or need help getting started, feel free to reach out to our team at any time.</p>
+
         <p>Happy learning! 📚</p>
         <p style="color: #555;">— The Decipher Team</p>
         
