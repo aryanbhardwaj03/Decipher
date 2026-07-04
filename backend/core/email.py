@@ -137,23 +137,23 @@ Happy learning!
     html_content = f"""
     <html>
       <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #374151; line-height: 1.6; background-color: #f9fafb;">
-        <div style="background-color: #ffffff; border-radius: 12px; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: 1px solid #f3f4f6;">
+        <div style="background-color: #ffffff; border-radius: 12px; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: 1px solid #f3f4f6; border-top: 4px solid #ea580c;">
             <div style="text-align: center; margin-bottom: 24px;">
-              <h1 style="color: #111827; margin: 0; font-size: 28px;">Decipher</h1>
+              <h1 style="color: #ea580c; margin: 0; font-size: 28px; letter-spacing: -0.02em;">Decipher</h1>
               <p style="color: #6b7280; font-size: 15px; margin-top: 4px;">AI-Powered Document Intelligence</p>
             </div>
             
             <p style="font-size: 16px; color: #1f2937;">{greeting}</p>
             <p style="font-size: 16px;">Welcome to Decipher! We're thrilled to have you on board. You can now start uploading your documents and let our AI uncover the knowledge hidden within them through intelligent summaries, chat interactions, quizzes, and flashcards.</p>
             
-            <div style="margin: 32px 0; padding: 24px; background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-                <h3 style="margin-top: 0; color: #0f172a; font-size: 18px;">Unlock More with Decipher Plans</h3>
-                <p style="font-size: 15px; margin-bottom: 16px;">We offer flexible plans to match how you work:</p>
+            <div style="margin: 32px 0; padding: 24px; background-color: #fff7ed; border-radius: 8px; border: 1px solid #ffedd5;">
+                <h3 style="margin-top: 0; color: #9a3412; font-size: 18px;">Unlock More with Decipher Plans</h3>
+                <p style="font-size: 15px; margin-bottom: 16px; color: #9a3412;">We offer flexible plans to match how you work:</p>
                 
-                <ul style="padding-left: 20px; margin: 0; font-size: 15px; color: #334155;">
-                    <li style="margin-bottom: 12px;"><strong>Free Plan:</strong> Perfect for getting started. 5 documents/month, basic AI chat, and standard summaries.</li>
-                    <li style="margin-bottom: 12px;"><strong>Plus Plan:</strong> For regular users. Up to 50 documents/month, priority processing, and advanced analysis tools.</li>
-                    <li><strong>Pro Plan:</strong> For power users. Unlimited documents, maximum AI context size, and premium support.</li>
+                <ul style="padding-left: 20px; margin: 0; font-size: 15px; color: #7c2d12;">
+                    <li style="margin-bottom: 12px;"><strong style="color: #ea580c;">Free Plan:</strong> Perfect for getting started. 5 documents/month, basic AI chat, and standard summaries.</li>
+                    <li style="margin-bottom: 12px;"><strong style="color: #ea580c;">Plus Plan:</strong> For regular users. Up to 50 documents/month, priority processing, and advanced analysis tools.</li>
+                    <li><strong style="color: #ea580c;">Pro Plan:</strong> For power users. Unlimited documents, maximum AI context size, and premium support.</li>
                 </ul>
             </div>
             
@@ -161,7 +161,7 @@ Happy learning!
             
             <p style="font-size: 16px;">If you have any questions or need help getting started, just reply to this email—our team is always here for you.</p>
 
-            <p style="font-size: 16px; margin-top: 24px;">Happy learning! 📚<br/><span style="color: #64748b;">— The Decipher Team</span></p>
+            <p style="font-size: 16px; margin-top: 24px;">Happy learning! 📚<br/><span style="color: #ea580c; font-weight: 600;">— The Decipher Team</span></p>
         </div>
         
         <div style="text-align: center; margin-top: 24px;">
