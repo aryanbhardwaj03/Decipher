@@ -35,9 +35,10 @@ def _ensure_welcome_email(user, db: Session):
         except:
             prefs = {}
             
-    if not prefs.get("welcome_email_sent"):
+    # Changed to v2 so all existing users receive the new enhanced email once upon next login
+    if not prefs.get("new_welcome_email_sent_v2"):
         send_welcome_email(user.email, user.name)
-        prefs["welcome_email_sent"] = True
+        prefs["new_welcome_email_sent_v2"] = True
         user.ai_preferences = prefs
         flag_modified(user, "ai_preferences")
         db.commit()
