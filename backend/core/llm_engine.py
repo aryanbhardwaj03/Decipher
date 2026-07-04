@@ -155,13 +155,18 @@ class LLMEngine:
 
     def _groq_generate(self, prompt, system_prompt, temperature, max_tokens, format=None):
         client = self._get_groq()
+        
+        # Cap max_tokens to 1500 to avoid Groq's 6000 TPM limit
+        groq_max = min(max_tokens, 1500)
+        
+        # Truncate prompt to ~18000 characters (approx 4500 tokens)
+        if len(prompt) > 18000:
+            prompt = prompt[:18000] + "\n\n...[truncated to fit rate limits]"
+
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
-
-        # Cap max_tokens to 3000 to avoid Groq's 6000 TPM free tier limit
-        groq_max = min(max_tokens, 3000)
 
         kwargs = {
             "model": settings.GROQ_MODEL,
@@ -177,13 +182,18 @@ class LLMEngine:
 
     def _groq_stream(self, prompt, system_prompt, temperature, max_tokens):
         client = self._get_groq()
+        
+        # Cap max_tokens to 1500 to avoid Groq's 6000 TPM limit
+        groq_max = min(max_tokens, 1500)
+        
+        # Truncate prompt to ~18000 characters (approx 4500 tokens)
+        if len(prompt) > 18000:
+            prompt = prompt[:18000] + "\n\n...[truncated to fit rate limits]"
+
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
-
-        # Cap max_tokens to 3000 to avoid Groq's 6000 TPM free tier limit
-        groq_max = min(max_tokens, 3000)
 
         stream = client.chat.completions.create(
             model=settings.GROQ_MODEL,

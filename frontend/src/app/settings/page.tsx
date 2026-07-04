@@ -637,13 +637,13 @@ export default function SettingsPage({ searchParams }: SettingsPageProps) {
                   <CardDescription>Manage your subscription plan and billing history.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {user?.plan === "Pro" ? (
+                  {user?.plan === "Pro" || user?.plan === "Plus" ? (
                     <>
                       <div className="p-6 rounded-xl border-2 border-primary bg-primary/5 flex justify-between items-center">
                         <div>
-                          <h4 className="font-bold text-lg text-primary">Pro Plan</h4>
+                          <h4 className="font-bold text-lg text-primary">{user?.plan} Plan</h4>
                           <p className="text-sm text-muted-foreground">
-                            You are currently on the Pro tier. Enjoy unlimited access.
+                            You are currently on the {user?.plan} tier. Enjoy unlimited access.
                           </p>
                         </div>
                         <div className="text-right">
