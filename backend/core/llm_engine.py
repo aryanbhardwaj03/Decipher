@@ -159,9 +159,9 @@ class LLMEngine:
         # Cap max_tokens to 1500 to avoid Groq's 6000 TPM limit
         groq_max = min(max_tokens, 1500)
         
-        # Truncate prompt to ~18000 characters (approx 4500 tokens)
-        if len(prompt) > 18000:
-            prompt = prompt[:18000] + "\n\n...[truncated to fit rate limits]"
+        # Truncate prompt to ~12000 characters (approx 3000 tokens)
+        if len(prompt) > 12000:
+            prompt = prompt[:12000] + "\n\n...[truncated to fit rate limits]"
 
         messages = []
         if system_prompt:
@@ -186,9 +186,9 @@ class LLMEngine:
         # Cap max_tokens to 1500 to avoid Groq's 6000 TPM limit
         groq_max = min(max_tokens, 1500)
         
-        # Truncate prompt to ~18000 characters (approx 4500 tokens)
-        if len(prompt) > 18000:
-            prompt = prompt[:18000] + "\n\n...[truncated to fit rate limits]"
+        # Truncate prompt to ~12000 characters (approx 3000 tokens)
+        if len(prompt) > 12000:
+            prompt = prompt[:12000] + "\n\n...[truncated to fit rate limits]"
 
         messages = []
         if system_prompt:
