@@ -156,55 +156,72 @@ class LLMEngine:
     def _groq_generate(self, prompt, system_prompt, temperature, max_tokens, format=None):
         client = self._get_groq()
         
-        # Cap max_tokens to 1500 to avoid Groq's 6000 TPM limit
-        groq_max = min(max_tokens, 1500)
-        
-        # Truncate prompt to ~12000 characters (approx 3000 tokens)
-        if len(prompt) > 12000:
-            prompt = prompt[:12000] + "\n\n...[truncated to fit rate limits]"
+        # Cap max_tokens to 1000 to leave more room for prompt
+        groq_max = min(max_tokens, 1000)
+        current_prompt = prompt
 
-        messages = []
-        if system_prompt:
-            messages.append({"role": "system", "content": system_prompt})
-        messages.append({"role": "user", "content": prompt})
+        while True:
+            messages = []
+            if system_prompt:
+                messages.append({"role": "system", "content": system_prompt})
+            messages.append({"role": "user", "content": current_prompt})
 
-        kwargs = {
-            "model": settings.GROQ_MODEL,
-            "messages": messages,
-            "temperature": temperature,
-            "max_tokens": groq_max,
-        }
-        if format == "json":
-            kwargs["response_format"] = {"type": "json_object"}
+            kwargs = {
+                "model": settings.GROQ_MODEL,
+                "messages": messages,
+                "temperature": temperature,
+                "max_tokens": groq_max,
+            }
+            if format == "json":
+                kwargs["response_format"] = {"type": "json_object"}
 
-        response = client.chat.completions.create(**kwargs)
-        return response.choices[0].message.content
+            try:
+                response = client.chat.completions.create(**kwargs)
+                return response.choices[0].message.content
+            except Exception as e:
+                error_msg = str(e)
+                if "413" in error_msg and "Request too large" in error_msg:
+                    if len(current_prompt) < 500:
+                        raise Exception("Document too large for Groq free tier limit, even after truncation.")
+                    # Halve the prompt and try again
+                    current_prompt = current_prompt[:len(current_prompt) // 2] + "\n\n...[truncated]"
+                else:
+                    raise e
 
     def _groq_stream(self, prompt, system_prompt, temperature, max_tokens):
         client = self._get_groq()
         
-        # Cap max_tokens to 1500 to avoid Groq's 6000 TPM limit
-        groq_max = min(max_tokens, 1500)
-        
-        # Truncate prompt to ~12000 characters (approx 3000 tokens)
-        if len(prompt) > 12000:
-            prompt = prompt[:12000] + "\n\n...[truncated to fit rate limits]"
+        # Cap max_tokens to 1000 to leave more room for prompt
+        groq_max = min(max_tokens, 1000)
+        current_prompt = prompt
 
-        messages = []
-        if system_prompt:
-            messages.append({"role": "system", "content": system_prompt})
-        messages.append({"role": "user", "content": prompt})
+        while True:
+            messages = []
+            if system_prompt:
+                messages.append({"role": "system", "content": system_prompt})
+            messages.append({"role": "user", "content": current_prompt})
 
-        stream = client.chat.completions.create(
-            model=settings.GROQ_MODEL,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=groq_max,
-            stream=True,
-        )
-        for chunk in stream:
-            if chunk.choices[0].delta.content:
-                yield chunk.choices[0].delta.content
+            try:
+                stream = client.chat.completions.create(
+                    model=settings.GROQ_MODEL,
+                    messages=messages,
+                    temperature=temperature,
+                    max_tokens=groq_max,
+                    stream=True,
+                )
+                for chunk in stream:
+                    if chunk.choices[0].delta.content:
+                        yield chunk.choices[0].delta.content
+                break
+            except Exception as e:
+                error_msg = str(e)
+                if "413" in error_msg and "Request too large" in error_msg:
+                    if len(current_prompt) < 500:
+                        raise Exception("Document too large for Groq free tier limit, even after truncation.")
+                    # Halve the prompt and try again
+                    current_prompt = current_prompt[:len(current_prompt) // 2] + "\n\n...[truncated]"
+                else:
+                    raise e
 
     # ── Ollama ────────────────────────────────────────────────────────────
 
