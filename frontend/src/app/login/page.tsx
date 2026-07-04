@@ -48,7 +48,7 @@ export default function LoginPage() {
         
         const data = await apiGoogleAuth(userInfo.email, userInfo.name, userInfo.picture || "");
         login(data.access_token, data.user);
-        showToast(`Welcome via Google, ${data.user.name}! 🎉`, "success");
+        showToast(`Welcome, ${data.user.name}! 🎉`, "success");
         router.push("/dashboard");
       } catch (err: any) {
         console.error("Google Auth Error:", err);
