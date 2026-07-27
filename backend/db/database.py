@@ -11,7 +11,7 @@ from sqlalchemy.orm import sessionmaker, Session, DeclarativeBase
 from config import settings
 
 
-connect_args = {"check_same_thread": False} if settings.DATABASE_URL.startswith("sqlite") else {}
+connect_args = {"check_same_thread": False} if settings.DATABASE_URL.startswith("sqlite") else {"connect_timeout": 10}
 
 from sqlalchemy import event
 
@@ -23,7 +23,7 @@ engine = create_engine(
     connect_args=connect_args,
     **(
         {} if settings.DATABASE_URL.startswith("sqlite")
-        else {"pool_size": 10, "max_overflow": 20}
+        else {"pool_size": 10, "max_overflow": 20, "pool_recycle": 300}
     )
 )
 
@@ -55,10 +55,29 @@ def get_db():
 
 
 def create_tables():
-    """Create all database tables."""
-    if not settings.DATABASE_URL.startswith("sqlite"):
-        from sqlalchemy import text
-        with engine.connect() as conn:
-            conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-            conn.commit()
-    Base.metadata.create_all(bind=engine)
+    """Create all database tables with retry logic and error resilience."""
+    import time
+    import logging
+    logger = logging.getLogger(__name__)
+
+    max_retries = 5
+    for attempt in range(max_retries):
+        try:
+            if not settings.DATABASE_URL.startswith("sqlite"):
+                from sqlalchemy import text
+                with engine.connect() as conn:
+                    conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+                    conn.commit()
+            Base.metadata.create_all(bind=engine)
+            logger.info("Database tables connected and initialized successfully.")
+            return
+        except Exception as e:
+            if attempt < max_retries - 1:
+                wait_time = 2 ** attempt
+                logger.warning(f"Database connection attempt {attempt + 1}/{max_retries} failed ({e}). Retrying in {wait_time}s...")
+                time.sleep(wait_time)
+            else:
+                logger.error(f"❌ Could not connect to database after {max_retries} retries: {e}")
+                logger.error("💡 HINT: If using Supabase or Neon in Hugging Face Spaces, check that you are using the IPv4 Connection Pooler / Supavisor URL (e.g. port 6543) instead of the Direct IPv6 URL (port 5432), and check your DATABASE_URL in HuggingFace Secrets.")
+                # We DO NOT re-raise here so that Uvicorn startup can complete and health checks (GET /) pass!
+
