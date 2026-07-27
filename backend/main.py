@@ -105,6 +105,19 @@ async def health_check():
         "llm_provider": settings.LLM_PROVIDER,
     }
 
+@app.get("/api/health/db")
+@app.head("/api/health/db")
+def db_health_check():
+    """Lightweight database ping endpoint to prevent cloud database auto-pausing."""
+    from db.database import engine
+    from sqlalchemy import text
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return {"status": "healthy", "database": "connected"}
+    except Exception as e:
+        return {"status": "unhealthy", "database": str(e)}
+
 
 # ── Run ──────────────────────────────────────────────────────────────────
 if __name__ == "__main__":

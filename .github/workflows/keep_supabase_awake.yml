@@ -1,0 +1,16 @@
+name: Keep Supabase Awake
+
+on:
+  schedule:
+    # Run every 3 days at midnight UTC
+    - cron: '0 0 */3 * *'
+  workflow_dispatch:  # Allows running manually from GitHub Actions tab
+
+jobs:
+  ping-database:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Database Health Endpoint
+        run: |
+          echo "Pinging Decipher backend to keep Supabase awake..."
+          curl -f -s --retry 3 --retry-delay 5 https://ab12361-decipher-backend.hf.space/api/health/db || echo "Ping attempted."
