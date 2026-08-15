@@ -231,14 +231,17 @@ def get_document_file(
     if not doc or (doc.user_id != user.id and user.role != "admin"):
         raise HTTPException(status_code=404, detail="Document not found")
 
+    if not doc.storage_url:
+        raise HTTPException(status_code=404, detail="Document has no storage URL recorded.")
+
     if doc.storage_url.startswith("http"):
-        # If it's a Supabase URL, redirect the user to the public URL directly
+        # If it's a Supabase/Cloud URL, redirect directly
         from fastapi.responses import RedirectResponse
         return RedirectResponse(url=doc.storage_url)
 
     file_path = Path(doc.storage_url)
     if not file_path.exists():
-        raise HTTPException(status_code=404, detail="File not found on server")
+        raise HTTPException(status_code=404, detail=f"File '{doc.original_filename}' was stored locally ({doc.storage_url}) and is not available on this server.")
 
     return FileResponse(
         path=file_path,

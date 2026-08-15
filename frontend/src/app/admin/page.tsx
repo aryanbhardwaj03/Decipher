@@ -78,7 +78,10 @@ export default function AdminDashboard() {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      if (!res.ok) throw new Error("Failed to download");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.detail || "Failed to download document from server.");
+      }
       
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
