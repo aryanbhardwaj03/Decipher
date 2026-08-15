@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Users, FileText, Activity, ShieldAlert, Download } from "lucide-react";
+import { Users, FileText, Activity, ShieldAlert, Download, Send } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useRouter } from "next/navigation";
@@ -25,6 +25,50 @@ export default function AdminDashboard() {
 
   const [documentsList, setDocumentsList] = useState<any[]>([]);
   const [downloadingDoc, setDownloadingDoc] = useState<string | null>(null);
+
+  // Email Broadcast State
+  const [broadcastSubject, setBroadcastSubject] = useState("");
+  const [broadcastContent, setBroadcastContent] = useState("");
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
+
+  const handleBroadcast = async () => {
+    if (!broadcastSubject || !broadcastContent) {
+      alert("Please provide both a subject and HTML content.");
+      return;
+    }
+    
+    if (!confirm("Are you sure you want to broadcast this email to ALL real users?")) {
+      return;
+    }
+    
+    setIsBroadcasting(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_BASE}/api/admin/broadcast-email`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+          subject: broadcastSubject,
+          html_content: broadcastContent
+        })
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Failed to broadcast email");
+      
+      alert(data.message || "Email broadcast successfully queued!");
+      setBroadcastSubject("");
+      setBroadcastContent("");
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "Something went wrong.");
+    } finally {
+      setIsBroadcasting(false);
+    }
+  };
 
   const handleViewDocument = async (docId: string, filename: string) => {
     try {
@@ -180,6 +224,55 @@ export default function AdminDashboard() {
                   <Line type="monotone" dataKey="hits" stroke="#f97316" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
                 </LineChart>
               </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Email Broadcast Section */}
+        <Card className="mb-10 border-primary/20 shadow-md">
+          <CardHeader className="bg-primary/5 border-b border-border/50 pb-4">
+            <div className="flex items-center gap-2">
+              <Send className="w-5 h-5 text-primary" />
+              <CardTitle>Email Broadcast</CardTitle>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">Send an email announcement to all verified, real users.</p>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Subject Line</label>
+                <input 
+                  type="text" 
+                  value={broadcastSubject}
+                  onChange={(e) => setBroadcastSubject(e.target.value)}
+                  placeholder="e.g. 🇮🇳 Happy 80th Independence Day from Decipher!" 
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Email Content (HTML)</label>
+                <textarea 
+                  value={broadcastContent}
+                  onChange={(e) => setBroadcastContent(e.target.value)}
+                  placeholder="<h1>Hello!</h1><p>Type your beautiful HTML email here...</p>" 
+                  rows={6}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring font-mono"
+                />
+              </div>
+              <div className="flex justify-end">
+                <button
+                  onClick={handleBroadcast}
+                  disabled={isBroadcasting || !broadcastSubject || !broadcastContent}
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-primary/90 h-10 px-4 py-2 bg-primary text-primary-foreground gap-2"
+                >
+                  {isBroadcasting ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                  {isBroadcasting ? "Sending Broadcast..." : "Send Broadcast to All Users"}
+                </button>
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -119,16 +119,6 @@ def db_health_check():
         return {"status": "unhealthy", "database": str(e)}
 
 
-@app.get("/api/trigger-independence-email")
-def trigger_independence_email():
-    """Temporary endpoint to trigger the independence day emails from the browser."""
-    from send_independence_day_email import main as send_email_main
-    import threading
-    thread = threading.Thread(target=send_email_main, daemon=True)
-    thread.start()
-    return {"status": "success", "message": "Independence Day emails are being sent in the background!"}
-
-
 # ── Run ──────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import uvicorn

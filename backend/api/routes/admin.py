@@ -120,3 +120,68 @@ def admin_delete_document(
 
     crud.delete_document(db, doc_id)
     return {"message": "Document deleted"}
+
+
+from pydantic import BaseModel
+from fastapi import BackgroundTasks
+
+class BroadcastEmailRequest(BaseModel):
+    subject: str
+    html_content: str
+
+def _process_email_broadcast(users: list, subject: str, html_content: str):
+    """Background task to send emails to all real users."""
+    from core.email import _send_email_sync
+    import sys
+    
+    # Safely handle stdout for emojis
+    if hasattr(sys.stdout, 'reconfigure'):
+        try:
+            sys.stdout.reconfigure(encoding='utf-8')
+        except Exception:
+            pass
+
+    success_count = 0
+    logger.info(f"Starting email broadcast to {len(users)} users. Subject: {subject}")
+    
+    for name, email in users:
+        try:
+            _send_email_sync(to_email=email, subject=subject, html_content=html_content)
+            success_count += 1
+        except Exception as e:
+            logger.error(f"Failed to send email to {email}: {e}")
+            
+    logger.info(f"Email broadcast completed. Sent {success_count}/{len(users)} emails.")
+
+@router.post("/broadcast-email")
+def admin_broadcast_email(
+    req: BroadcastEmailRequest,
+    background_tasks: BackgroundTasks,
+    user=Depends(get_admin_user),
+    db: Session = Depends(get_db),
+):
+    """Admin endpoint to broadcast an email to all real users."""
+    from sqlalchemy import text
+    from db.database import engine
+    
+    query = text("""
+        SELECT name, email FROM users 
+        WHERE email IS NOT NULL 
+          AND email != ''
+          AND email NOT LIKE '%@studyai.local'
+          AND email NOT LIKE '%@example.com'
+          AND email NOT LIKE '%@test.com'
+          AND email NOT LIKE 'test%'
+          AND email != 'demo.user@gmail.com'
+    """)
+    
+    with engine.connect() as conn:
+        result = conn.execute(query)
+        users = result.fetchall()
+        
+    if not users:
+        raise HTTPException(status_code=400, detail="No valid real users found to broadcast to.")
+        
+    background_tasks.add_task(_process_email_broadcast, users, req.subject, req.html_content)
+    
+    return {"message": f"Broadcast queued for {len(users)} users.", "queued_count": len(users)}
