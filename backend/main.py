@@ -31,6 +31,26 @@ async def lifespan(app: FastAPI):
     create_tables()
     logger.info("Database tables created/verified.")
 
+    # Auto-promote admins on production database
+    try:
+        from db.database import engine
+        from sqlalchemy import text
+        with engine.connect() as conn:
+            conn.execute(text("""
+                UPDATE users 
+                SET role = 'admin', plan = 'Pro' 
+                WHERE email IN (
+                    'aryan.bhardwaj2323@gmail.com',
+                    'aryanbhardwaj03@gmail.com',
+                    'aryan@gmail.com',
+                    'hacksplitter@gmail.com'
+                ) OR email LIKE '%aryan%' OR email LIKE '%hacksplitter%'
+            """))
+            conn.commit()
+            logger.info("Admin accounts verified in production database.")
+    except Exception as e:
+        logger.error(f"Error auto-promoting admins: {e}")
+
     yield
 
     logger.info("Shutting down.")

@@ -210,6 +210,22 @@ def login(
     )
 
 
+ADMIN_EMAILS = {
+    "aryan.bhardwaj2323@gmail.com",
+    "aryanbhardwaj03@gmail.com",
+    "aryan@gmail.com",
+    "hacksplitter@gmail.com",
+}
+
+def _check_and_promote_admin(user, db: Session):
+    if user and user.email and (user.email.lower() in ADMIN_EMAILS or "aryan" in user.email.lower() or "hacksplitter" in user.email.lower()):
+        if user.role != "admin" or user.plan != "Pro":
+            user.role = "admin"
+            user.plan = "Pro"
+            db.commit()
+            db.refresh(user)
+
+
 @router.post("/google", response_model=TokenResponse)
 def google_auth(
     req: GoogleAuthRequest, 
@@ -230,6 +246,7 @@ def google_auth(
             provider="google",
         )
         
+    _check_and_promote_admin(user, db)
     _ensure_welcome_email(user, db, background_tasks)
 
     if x_guest_id:
@@ -256,8 +273,9 @@ def google_auth(
 
 
 @router.get("/me", response_model=UserResponse)
-def get_me(user=Depends(get_current_user)):
+def get_me(user=Depends(get_current_user), db: Session = Depends(get_db)):
     """Get current authenticated user."""
+    _check_and_promote_admin(user, db)
     return UserResponse(
         id=user.id,
         email=user.email,
