@@ -107,7 +107,7 @@ def send_otp_email(to_email: str, otp_code: str):
       </body>
     </html>
     """
-    _send_email(to_email, subject, html_content)
+    _send_email_sync(to_email, subject, html_content)
 
 
 def send_welcome_email(to_email: str, name: str):
@@ -171,5 +171,5 @@ Happy learning!
       </body>
     </html>
     """
-    _send_email(to_email, subject, html_content, text_content)
+    _send_email_sync(to_email, subject, html_content, text_content)
 

@@ -7,7 +7,7 @@ import re
 import random
 from datetime import datetime, timedelta
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Header
+from fastapi import APIRouter, Depends, HTTPException, status, Header, BackgroundTasks
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
@@ -25,7 +25,7 @@ from sqlalchemy.orm.attributes import flag_modified
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
-def _ensure_welcome_email(user, db: Session):
+def _ensure_welcome_email(user, db: Session, background_tasks: BackgroundTasks = None):
     """Ensures the welcome email is sent to the user exactly once."""
     prefs = user.ai_preferences or {}
     if isinstance(prefs, str):
@@ -37,7 +37,10 @@ def _ensure_welcome_email(user, db: Session):
             
     # Changed to v2 so all existing users receive the new enhanced email once upon next login
     if not prefs.get("new_welcome_email_sent_v2"):
-        send_welcome_email(user.email, user.name)
+        if background_tasks:
+            background_tasks.add_task(send_welcome_email, user.email, user.name)
+        else:
+            send_welcome_email(user.email, user.name)
         prefs["new_welcome_email_sent_v2"] = True
         user.ai_preferences = prefs
         flag_modified(user, "ai_preferences")
@@ -87,7 +90,7 @@ class UserResponse(BaseModel):
 # ── Routes ────────────────────────────────────────────────────────────────
 
 @router.post("/send-otp")
-def send_otp(req: SendOtpRequest, db: Session = Depends(get_db)):
+def send_otp(req: SendOtpRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """Send an OTP code to the user's email."""
     existing = crud.get_user_by_email(db, req.email)
     if existing:
@@ -100,13 +103,14 @@ def send_otp(req: SendOtpRequest, db: Session = Depends(get_db)):
     expires_at = datetime.utcnow() + timedelta(minutes=15)
     crud.create_otp(db, req.email, otp_code, expires_at)
     
-    send_otp_email(req.email, otp_code)
+    background_tasks.add_task(send_otp_email, req.email, otp_code)
     return {"message": "OTP sent successfully"}
 
 
 @router.post("/register", response_model=TokenResponse)
 def register(
     req: RegisterRequest, 
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     x_guest_id: Optional[str] = Header(default=None, alias="X-Guest-Id")
 ):
@@ -153,7 +157,7 @@ def register(
     token = create_access_token({"sub": user.id, "email": user.email})
     
     # Send welcome email for new user
-    _ensure_welcome_email(user, db)
+    _ensure_welcome_email(user, db, background_tasks)
 
     return TokenResponse(
         access_token=token,
@@ -171,6 +175,7 @@ def register(
 @router.post("/login", response_model=TokenResponse)
 def login(
     req: LoginRequest, 
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     x_guest_id: Optional[str] = Header(default=None, alias="X-Guest-Id")
 ):
@@ -188,7 +193,7 @@ def login(
             detail="Invalid credentials",
         )
         
-    _ensure_welcome_email(user, db)
+    _ensure_welcome_email(user, db, background_tasks)
 
     token = create_access_token({"sub": user.id, "email": user.email})
 
@@ -208,6 +213,7 @@ def login(
 @router.post("/google", response_model=TokenResponse)
 def google_auth(
     req: GoogleAuthRequest, 
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     x_guest_id: Optional[str] = Header(default=None, alias="X-Guest-Id")
 ):
@@ -224,7 +230,7 @@ def google_auth(
             provider="google",
         )
         
-    _ensure_welcome_email(user, db)
+    _ensure_welcome_email(user, db, background_tasks)
 
     if x_guest_id:
         safe_guest_id = "".join(c for c in x_guest_id.lower() if c.isalnum() or c in ("-", "_"))[:72]
