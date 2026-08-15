@@ -98,8 +98,12 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    if (!loading && user?.role !== "admin") {
-      router.push("/");
+    if (!loading) {
+      if (!user) {
+        router.push("/login");
+      } else if (user.role !== "admin") {
+        router.push("/dashboard");
+      }
     }
   }, [user, loading, router]);
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
 import { 
   Home, BookOpen, MessageSquare, FileText, CheckSquare, 
-  Layers, Settings, Plus, Sparkles, Sun, Moon, Image as ImageIcon, Search, StickyNote, PanelLeftClose
+  Layers, Settings, Plus, Sparkles, Sun, Moon, Image as ImageIcon, Search, StickyNote, PanelLeftClose, ShieldAlert
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -81,6 +81,19 @@ export function Sidebar({ onUploadClick, onClose }: { onUploadClick?: () => void
             </Link>
           );
         })}
+
+        {user?.role === "admin" && (
+          <Link
+            href="/admin"
+            className={cn(
+              "flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium transition-all duration-200 active:scale-[0.98] text-red-500 hover:bg-red-500/10",
+              pathname === "/admin" && "bg-red-500/15 font-bold"
+            )}
+          >
+            <ShieldAlert className="w-4 h-4 text-red-500" />
+            Admin Panel
+          </Link>
+        )}
       </div>
 
       {/* Footer Area */}

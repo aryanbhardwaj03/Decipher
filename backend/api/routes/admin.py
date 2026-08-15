@@ -65,7 +65,7 @@ def list_users(
                 "name": u.name,
                 "role": u.role,
                 "xp": u.xp,
-                "created_at": u.created_at.isoformat(),
+                "created_at": u.created_at.isoformat() if u.created_at else "",
                 "document_count": len(u.documents) if u.documents else 0,
             }
             for u in users
@@ -94,7 +94,7 @@ def list_all_documents(
                 "file_size": d.file_size,
                 "status": d.status,
                 "user_id": d.user_id,
-                "created_at": d.created_at.isoformat(),
+                "created_at": d.created_at.isoformat() if d.created_at else "",
             }
             for d in docs
         ],
