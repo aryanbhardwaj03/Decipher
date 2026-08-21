@@ -155,11 +155,13 @@ class LLMEngine:
 
     def _groq_generate(self, prompt, system_prompt, temperature, max_tokens, format=None):
         client = self._get_groq()
+        import time
         
         # Cap max_tokens to 1000 to leave more room for prompt
         groq_max = min(max_tokens, 1000)
         current_prompt = prompt
         current_model = settings.GROQ_MODEL
+        retries = 0
 
         while True:
             messages = []
@@ -192,6 +194,11 @@ class LLMEngine:
                         logger.warning(f"Rate limit reached for {current_model}, falling back to llama3-8b-8192")
                         current_model = "llama3-8b-8192"
                         continue
+                    elif retries < 3:
+                        logger.warning(f"Rate limit reached for {current_model}. Retrying in 4 seconds...")
+                        time.sleep(4)
+                        retries += 1
+                        continue
                     else:
                         raise Exception("Groq API rate limit reached. Please wait a moment and try again.")
                 else:
@@ -199,11 +206,13 @@ class LLMEngine:
 
     def _groq_stream(self, prompt, system_prompt, temperature, max_tokens):
         client = self._get_groq()
+        import time
         
         # Cap max_tokens to 1000 to leave more room for prompt
         groq_max = min(max_tokens, 1000)
         current_prompt = prompt
         current_model = settings.GROQ_MODEL
+        retries = 0
 
         while True:
             messages = []
@@ -235,6 +244,11 @@ class LLMEngine:
                     if current_model != "llama3-8b-8192":
                         logger.warning(f"Rate limit reached for {current_model}, falling back to llama3-8b-8192")
                         current_model = "llama3-8b-8192"
+                        continue
+                    elif retries < 3:
+                        logger.warning(f"Rate limit reached for {current_model}. Retrying in 4 seconds...")
+                        time.sleep(4)
+                        retries += 1
                         continue
                     else:
                         raise Exception("Groq API rate limit reached. Please wait a moment and try again.")
