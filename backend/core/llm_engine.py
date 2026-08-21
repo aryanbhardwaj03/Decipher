@@ -183,11 +183,12 @@ class LLMEngine:
                 return response.choices[0].message.content
             except Exception as e:
                 error_msg = str(e)
-                if "413" in error_msg and "Request too large" in error_msg:
+                if "413" in error_msg or "400" in error_msg or "too large" in error_msg.lower() or "context length" in error_msg.lower():
                     if len(current_prompt) < 500:
                         raise Exception("Document too large for Groq free tier limit, even after truncation.")
                     # Halve the prompt and try again
                     current_prompt = current_prompt[:len(current_prompt) // 2] + "\n\n...[truncated]"
+                    continue
                 elif "429" in error_msg or "Rate limit reached" in error_msg:
                     # Fallback to smaller model with higher rate limits
                     if current_model != "llama3-8b-8192":
@@ -200,7 +201,7 @@ class LLMEngine:
                         retries += 1
                         continue
                     else:
-                        raise Exception("Groq API rate limit reached. Please wait a moment and try again.")
+                        raise Exception(f"Groq API rate limit reached after retries. Last error: {error_msg}")
                 else:
                     raise e
 
@@ -234,11 +235,12 @@ class LLMEngine:
                 break
             except Exception as e:
                 error_msg = str(e)
-                if "413" in error_msg and "Request too large" in error_msg:
+                if "413" in error_msg or "400" in error_msg or "too large" in error_msg.lower() or "context length" in error_msg.lower():
                     if len(current_prompt) < 500:
                         raise Exception("Document too large for Groq free tier limit, even after truncation.")
                     # Halve the prompt and try again
                     current_prompt = current_prompt[:len(current_prompt) // 2] + "\n\n...[truncated]"
+                    continue
                 elif "429" in error_msg or "Rate limit reached" in error_msg:
                     # Fallback to smaller model with higher rate limits
                     if current_model != "llama3-8b-8192":
@@ -251,7 +253,7 @@ class LLMEngine:
                         retries += 1
                         continue
                     else:
-                        raise Exception("Groq API rate limit reached. Please wait a moment and try again.")
+                        raise Exception(f"Groq API rate limit reached after retries. Last error: {error_msg}")
                 else:
                     raise e
 

@@ -65,8 +65,8 @@ def generate_quiz(
     if not results:
         raise HTTPException(status_code=400, detail="This document has no readable text.")
 
-    # Combine up to ~100k characters (~25k tokens), which fits in modern context windows
-    combined = "\n\n".join([r["text"] for r in results])[:100000]
+    # Combine up to ~20k characters (~5k tokens) to stay within Groq's 6k TPM limit
+    combined = "\n\n".join([r["text"] for r in results])[:20000]
 
     prompt = build_structured_quiz_prompt(
         text=combined,
