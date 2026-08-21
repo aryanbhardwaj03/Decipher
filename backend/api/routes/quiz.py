@@ -123,6 +123,33 @@ def submit_quiz(
     score = 0
     results = []
 
+    # Pre-evaluate short answers in parallel to speed up submission
+    short_answers_to_eval = []
+    for answer in req.answers:
+        idx = answer.get("question_index", 0)
+        user_answer = answer.get("answer", "").strip()
+        if idx < len(questions):
+            q = questions[idx]
+            q_type = q.get("type", "mcq")
+            correct = q.get("correct_answer", "")
+            if q_type == "short_answer" and user_answer and user_answer.lower().strip() != str(correct).lower().strip():
+                short_answers_to_eval.append((idx, q.get("question", ""), correct, user_answer))
+
+    eval_results = {}
+    if short_answers_to_eval:
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            futures = {
+                executor.submit(_evaluate_short_answer, q_text, correct, u_ans): idx
+                for idx, q_text, correct, u_ans in short_answers_to_eval
+            }
+            for future in futures:
+                idx = futures[future]
+                try:
+                    eval_results[idx] = future.result()
+                except Exception:
+                    eval_results[idx] = False
+
     for answer in req.answers:
         idx = answer.get("question_index", 0)
         user_answer = answer.get("answer", "").strip()
@@ -135,13 +162,17 @@ def submit_quiz(
         q_type = q.get("type", "mcq")
 
         is_correct = False
-        if q_type in ("mcq", "true_false"):
+        if q_type in ("mcq", "true_false", "multiple_choice"):
             is_correct = user_answer.upper() == str(correct).upper()
         elif q_type == "fill_blanks":
             is_correct = user_answer.lower().strip() == str(correct).lower().strip()
         elif q_type == "short_answer":
-            # Use LLM to evaluate short answers
-            is_correct = _evaluate_short_answer(q.get("question", ""), correct, user_answer)
+            if not user_answer:
+                is_correct = False
+            elif user_answer.lower().strip() == str(correct).lower().strip():
+                is_correct = True
+            else:
+                is_correct = eval_results.get(idx, False)
 
         if is_correct:
             score += 1
@@ -210,19 +241,34 @@ def _evaluate_short_answer(question: str, correct: str, user_answer: str) -> boo
 
     try:
         from core.llm_engine import get_llm_engine
+        import json
         llm = get_llm_engine()
 
-        result = llm.generate(
+        result_text = llm.generate(
             prompt=f"""Question: {question}
 Correct answer: {correct}
 Student's answer: {user_answer}
 
-Is the student's answer essentially correct? Reply with ONLY "YES" or "NO".""",
-            system_prompt="You evaluate answers. Reply ONLY with YES or NO.",
-            max_tokens=5,
+Is the student's answer essentially correct or close enough? 
+Return a JSON object with a single boolean field "is_correct" set to true or false. 
+Example: {{"is_correct": false}}""",
+            system_prompt="You evaluate answers. Return ONLY valid JSON.",
+            max_tokens=20,
             temperature=0.0,
+            format="json"
         )
-        return "YES" in result.upper()
+        
+        # Parse JSON to avoid false positives with words like "YES" in explanations
+        try:
+            start = result_text.find("{")
+            end = result_text.rfind("}") + 1
+            if start >= 0 and end > start:
+                data = json.loads(result_text[start:end])
+                return bool(data.get("is_correct", False))
+        except json.JSONDecodeError:
+            pass
+            
+        return "TRUE" in result_text.upper() or '"IS_CORRECT": TRUE' in result_text.upper()
     except Exception:
         return False
 
