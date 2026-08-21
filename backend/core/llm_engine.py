@@ -159,6 +159,7 @@ class LLMEngine:
         # Cap max_tokens to 1000 to leave more room for prompt
         groq_max = min(max_tokens, 1000)
         current_prompt = prompt
+        current_model = settings.GROQ_MODEL
 
         while True:
             messages = []
@@ -167,7 +168,7 @@ class LLMEngine:
             messages.append({"role": "user", "content": current_prompt})
 
             kwargs = {
-                "model": settings.GROQ_MODEL,
+                "model": current_model,
                 "messages": messages,
                 "temperature": temperature,
                 "max_tokens": groq_max,
@@ -185,6 +186,14 @@ class LLMEngine:
                         raise Exception("Document too large for Groq free tier limit, even after truncation.")
                     # Halve the prompt and try again
                     current_prompt = current_prompt[:len(current_prompt) // 2] + "\n\n...[truncated]"
+                elif "429" in error_msg or "Rate limit reached" in error_msg:
+                    # Fallback to smaller model with higher rate limits
+                    if current_model != "llama3-8b-8192":
+                        logger.warning(f"Rate limit reached for {current_model}, falling back to llama3-8b-8192")
+                        current_model = "llama3-8b-8192"
+                        continue
+                    else:
+                        raise Exception("Groq API rate limit reached. Please wait a moment and try again.")
                 else:
                     raise e
 
@@ -194,6 +203,7 @@ class LLMEngine:
         # Cap max_tokens to 1000 to leave more room for prompt
         groq_max = min(max_tokens, 1000)
         current_prompt = prompt
+        current_model = settings.GROQ_MODEL
 
         while True:
             messages = []
@@ -203,7 +213,7 @@ class LLMEngine:
 
             try:
                 stream = client.chat.completions.create(
-                    model=settings.GROQ_MODEL,
+                    model=current_model,
                     messages=messages,
                     temperature=temperature,
                     max_tokens=groq_max,
@@ -220,6 +230,14 @@ class LLMEngine:
                         raise Exception("Document too large for Groq free tier limit, even after truncation.")
                     # Halve the prompt and try again
                     current_prompt = current_prompt[:len(current_prompt) // 2] + "\n\n...[truncated]"
+                elif "429" in error_msg or "Rate limit reached" in error_msg:
+                    # Fallback to smaller model with higher rate limits
+                    if current_model != "llama3-8b-8192":
+                        logger.warning(f"Rate limit reached for {current_model}, falling back to llama3-8b-8192")
+                        current_model = "llama3-8b-8192"
+                        continue
+                    else:
+                        raise Exception("Groq API rate limit reached. Please wait a moment and try again.")
                 else:
                     raise e
 
